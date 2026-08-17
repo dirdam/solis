@@ -93,9 +93,20 @@
         color: var(--text-main);
     }
 
+    .globe-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    .globe-row .view-card {
+        width: 100%;
+        max-width: 480px;
+    }
+
     .views {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 24px;
         margin-bottom: 24px;
     }
@@ -281,15 +292,13 @@
         color: var(--text-main);
     }
 
-    @media screen and (max-width: 1000px) {
-        .views {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
     @media screen and (max-width: 768px) {
         .views {
             grid-template-columns: 1fr;
+        }
+
+        .globe-row .view-card {
+            max-width: 100%;
         }
 
         header h1 {
@@ -329,6 +338,21 @@
             </p>
         </div>
 
+        <div class="globe-row">
+            <div class="view-card">
+                <div class="view-card-header">
+                    <h3>3D view</h3>
+                    <button type="button" id="resetGlobeBtn" class="reset-btn">Reset view</button>
+                </div>
+                <div class="image-frame globe-frame">
+                    <canvas id="globeCanvas" width="520" height="430" aria-label="Draggable 3D globe showing Earth's axial tilt, with the night side dark"></canvas>
+                </div>
+                <div class="view-caption">
+                    Drag to look around &middot; night side dark &middot; <span class="highlight" id="captionHourGlobe">12:00</span> UTC
+                </div>
+            </div>
+        </div>
+
         <div class="views">
             <div class="view-card">
                 <div class="view-card-header">
@@ -350,18 +374,6 @@
                 </div>
                 <div class="view-caption">
                     Rotated for <span class="highlight" id="captionHour">12:00</span> UTC
-                </div>
-            </div>
-            <div class="view-card">
-                <div class="view-card-header">
-                    <h3>3D view</h3>
-                    <button type="button" id="resetGlobeBtn" class="reset-btn">Reset view</button>
-                </div>
-                <div class="image-frame globe-frame">
-                    <canvas id="globeCanvas" width="520" height="430" aria-label="Draggable 3D globe showing Earth's axial tilt, with the night side dark"></canvas>
-                </div>
-                <div class="view-caption">
-                    Drag to look around &middot; night side dark &middot; <span class="highlight" id="captionHourGlobe">12:00</span> UTC
                 </div>
             </div>
         </div>
