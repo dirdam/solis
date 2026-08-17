@@ -4,7 +4,7 @@ import io
 from functools import lru_cache
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 IMAGE_PATH = "projection.jpg"
 
@@ -12,6 +12,11 @@ IMAGE_PATH = "projection.jpg"
 # Only the hour of day spins the Earth around its polar axis (Z-axis).
 AXIAL_TILT_DEG = 24  # ~23.5 degrees precession, rounded as in the original app
 SIDEWAYS_DEG = 0
+
+# The app has no calendar/date input, so the day/night terminator uses a fixed
+# solstice-like solar declination purely for illustration (a real declination
+# varies with day of year; this just gives the terminator its familiar curve).
+DECLINATION_DEG = 23.4
 
 
 def equirectangular_to_sphere(lon, lat):
@@ -78,8 +83,13 @@ def rotate_equirectangular(img, x_angle=0, y_angle=0, z_angle=0):
     return Image.fromarray(img_array[px_y, px_x])
 
 
-def add_center_circle_overlay(image, circle_radius_fraction=1):
-    """Add a semi-transparent overlay with a transparent circle in the center."""
+def add_center_circle_overlay(image, circle_radius_fraction=1, blur_radius=20):
+    """Add a semi-transparent overlay with a soft-edged transparent circle in the center.
+
+    The circle marks the day side (the disc visible from the Sun) versus the night side
+    (the far hemisphere, dimmed). The edge is blurred to the same kind of soft terminator
+    used in the Earth's-own-view day/night overlay, rather than a hard cutoff.
+    """
     if image.mode != "RGBA":
         image = image.convert("RGBA")
 
@@ -96,8 +106,61 @@ def add_center_circle_overlay(image, circle_radius_fraction=1):
         [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
         fill=0,
     )
+    mask = mask.filter(ImageFilter.GaussianBlur(blur_radius))
     overlay.putalpha(mask)
     return Image.alpha_composite(result, overlay)
+
+
+def add_day_night_overlay(image):
+    """Shade the night side with a soft terminator and mark the subsolar point.
+
+    Assumes the image has already been rotated (as get_earth_view_png does) so the
+    current subsolar meridian sits at the horizontal center — that lets the shading
+    be computed directly in display coordinates, independent of the hour.
+    """
+    if image.mode != "RGBA":
+        image = image.convert("RGBA")
+
+    width, height = image.size
+    lon = np.radians(np.linspace(-180, 180, width))
+    lat = np.radians(np.linspace(90, -90, height))
+    lon_grid, lat_grid = np.meshgrid(lon, lat)
+
+    dec = np.radians(DECLINATION_DEG)
+    # sin(solar elevation) = cos(angular distance from the subsolar point).
+    sin_elevation = np.sin(dec) * np.sin(lat_grid) + np.cos(dec) * np.cos(lat_grid) * np.cos(lon_grid)
+    elevation_deg = np.degrees(np.arcsin(np.clip(sin_elevation, -1, 1)))
+
+    # Smooth ~8-degree-wide twilight band straddling the true terminator (elevation 0).
+    band = 8.0
+    night_alpha = np.clip(0.5 - elevation_deg / band, 0, 1)
+
+    max_alpha = 190
+    overlay = np.zeros((height, width, 4), dtype=np.uint8)
+    overlay[..., 0] = 6
+    overlay[..., 1] = 21
+    overlay[..., 2] = 88
+    overlay[..., 3] = (night_alpha * max_alpha).astype(np.uint8)
+
+    shaded = Image.alpha_composite(image, Image.fromarray(overlay, mode="RGBA"))
+
+    # Sun marker at the subsolar point (center column, declination latitude).
+    sun_x = width / 2
+    sun_y = (90 - DECLINATION_DEG) / 180 * height
+    radius = height * 0.018
+    glow_radius = radius * 2.2
+
+    draw = ImageDraw.Draw(shaded)
+    draw.ellipse(
+        [sun_x - glow_radius, sun_y - glow_radius, sun_x + glow_radius, sun_y + glow_radius],
+        fill=(255, 200, 80, 90),
+    )
+    draw.ellipse(
+        [sun_x - radius, sun_y - radius, sun_x + radius, sun_y + radius],
+        fill=(255, 176, 59, 255),
+    )
+
+    return shaded
 
 
 @lru_cache(maxsize=1)
@@ -140,6 +203,8 @@ def get_earth_view_png(hour: int) -> bytes:
     else:
         rotated = _base_image()
 
+    shaded = add_day_night_overlay(rotated)
+
     buf = io.BytesIO()
-    rotated.save(buf, format="PNG")
+    shaded.save(buf, format="PNG")
     return buf.getvalue()

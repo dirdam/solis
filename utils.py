@@ -1,5 +1,5 @@
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import streamlit as st
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
@@ -282,9 +282,13 @@ def add_center_circle_overlay(image, circle_radius_fraction=1):
     radius = min(width, height) * circle_radius_fraction / 2
     
     # Draw transparent circle (0 = transparent)
-    draw.ellipse([center_x - radius, center_y - radius, 
+    draw.ellipse([center_x - radius, center_y - radius,
                   center_x + radius, center_y + radius], fill=0)
-    
+
+    # Blur the hard circle edge into a soft day/night terminator, matching the
+    # gradient style used for the Earth's-own-view day/night overlay.
+    mask = mask.filter(ImageFilter.GaussianBlur(20))
+
     # Apply the mask to the overlay's alpha channel
     overlay.putalpha(mask)
     
