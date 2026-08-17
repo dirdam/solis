@@ -106,37 +106,29 @@
     .split-panels {
         display: flex;
         gap: 28px;
-        align-items: center;
+        /* Height is set to match a flat-map card's image height exactly, in JS
+           (see syncGlobeRowHeight) — a fixed aspect-ratio here can't do it precisely
+           because the flat-map row's height also includes fixed padding/gap
+           constants that don't scale proportionally with width. */
     }
 
     .orbit-panel {
         flex: 1 1 0;
         min-width: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .orbit-panel h4 {
-        font-size: 0.8em;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-dim);
-        font-weight: 700;
-        margin-bottom: 10px;
-        align-self: flex-start;
+        height: 100%;
     }
 
     .orbit-panel canvas {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: contain;
         display: block;
     }
 
     .split-panels .globe-frame {
         flex: 1 1 0;
         min-width: 0;
-        max-width: 480px;
+        height: 100%;
     }
 
     @media screen and (max-width: 900px) {
@@ -144,9 +136,19 @@
             flex-direction: column;
         }
 
+        .orbit-panel,
         .split-panels .globe-frame {
-            max-width: 100%;
+            height: auto;
             width: 100%;
+        }
+
+        .orbit-panel canvas {
+            aspect-ratio: 480 / 320;
+            height: auto;
+        }
+
+        .split-panels .globe-frame {
+            aspect-ratio: 520 / 430;
         }
     }
 
@@ -217,11 +219,12 @@
     }
 
     .image-frame.globe-frame {
-        aspect-ratio: 520 / 430;
+        aspect-ratio: auto;
         background: transparent;
     }
 
     .image-frame.globe-frame canvas {
+        object-fit: contain;
         cursor: grab;
         touch-action: none;
     }
@@ -332,14 +335,43 @@
         color: var(--accent);
     }
 
+    .slider-track {
+        position: relative;
+    }
+
+    /* Tick dots are separate absolutely-positioned elements (generated in JS, one
+       per selectable step) rather than a CSS background pattern — background-image
+       tiling can't land a dot exactly at every step position (the tile size needed
+       for N evenly-spaced marks doesn't divide evenly against where repeat/space
+       actually place copies), which is why the first attempt came out uneven. */
+    .slider-ticks {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 0;
+        pointer-events: none;
+    }
+
+    .slider-ticks span {
+        position: absolute;
+        top: 0;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #fff;
+        transform: translate(-50%, -50%);
+    }
+
     input[type="range"] {
         -webkit-appearance: none;
+        display: block;
         width: 100%;
         height: 8px;
         border-radius: 5px;
-        background: linear-gradient(to right, #1a1140, var(--accent) 50%, var(--accent-2));
         outline: none;
         cursor: pointer;
+        background: linear-gradient(to right, #1a1140, var(--accent) 50%, var(--accent-2));
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -447,7 +479,6 @@
                 </div>
                 <div class="split-panels">
                     <div class="orbit-panel">
-                        <h4>Earth's orbit</h4>
                         <canvas id="orbitCanvas" width="480" height="320" aria-label="Earth's position in its orbit around the Sun for the selected month"></canvas>
                     </div>
                     <div class="image-frame globe-frame">
@@ -456,6 +487,46 @@
                 </div>
                 <div class="view-caption">
                     Drag the globe to look around &middot; night side dark &middot; <span class="highlight" id="captionMonthGlobe">June</span>, <span class="highlight" id="captionHourGlobe">00:00</span> UTC
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="slider-row">
+                <button type="button" id="playPauseBtn" class="reset-btn play-pause-btn" aria-label="Pause"><span class="icon-pause"><span></span><span></span></span></button>
+                <div class="slider-group">
+                    <label>
+                        <span>Month of the year</span>
+                        <span id="monthValue">June</span>
+                    </label>
+                    <div class="slider-track">
+                        <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
+                        <div class="slider-ticks" id="monthTicks"></div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Jan</span>
+                        <span>Apr</span>
+                        <span>Jul</span>
+                        <span>Oct</span>
+                        <span>Dec</span>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label>
+                        <span>Hour of the day (UTC)</span>
+                        <span id="hourValue">00:00</span>
+                    </label>
+                    <div class="slider-track">
+                        <input type="range" id="hourSlider" min="0" max="24" step="1" value="0">
+                        <div class="slider-ticks" id="hourTicks"></div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>00:00</span>
+                        <span>06:00</span>
+                        <span>12:00</span>
+                        <span>18:00</span>
+                        <span>24:00</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -485,40 +556,6 @@
             </div>
         </div>
 
-        <div class="control-panel">
-            <div class="slider-row">
-                <button type="button" id="playPauseBtn" class="reset-btn play-pause-btn" aria-label="Pause"><span class="icon-pause"><span></span><span></span></span></button>
-                <div class="slider-group">
-                    <label>
-                        <span>Month of the year</span>
-                        <span id="monthValue">June</span>
-                    </label>
-                    <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
-                    <div class="scale-labels">
-                        <span>Jan</span>
-                        <span>Apr</span>
-                        <span>Jul</span>
-                        <span>Oct</span>
-                        <span>Dec</span>
-                    </div>
-                </div>
-                <div class="slider-group">
-                    <label>
-                        <span>Hour of the day (UTC)</span>
-                        <span id="hourValue">00:00</span>
-                    </label>
-                    <input type="range" id="hourSlider" min="0" max="24" step="1" value="0">
-                    <div class="scale-labels">
-                        <span>00:00</span>
-                        <span>06:00</span>
-                        <span>12:00</span>
-                        <span>18:00</span>
-                        <span>24:00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="panel how-it-works">
             <h2>How it works</h2>
             <p>This app renders Earth from the Sun's perspective at a given month and hour by:</p>
@@ -530,7 +567,7 @@
             </ul>
             <ul style="margin-top: 16px;">
                 <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt — this never changes with the seasons, only Earth's orientation relative to the Sun does</li>
-                <li><strong>Month of the year</strong>: sets how directly the Sun's light falls on each hemisphere, from a full tilt toward the Sun at the solstices to none at the equinoxes — shown as the Sun's-eye view's Earth tilt, the day/night terminator and Sun marker in Earth's own view, and the lit side of the 3D globe</li>
+                <li><strong>Month of the year</strong>: sets how directly the Sun's light falls on each hemisphere, from a full tilt toward the Sun at the solstices to none at the equinoxes — shown in the day/night terminator and Sun marker in Earth's own view and the lit side of the 3D globe. In the Sun's-eye view, Earth's full 23.4° tilt is always visible (the Sun itself stays fixed at dead center): it leans toward/away from the Sun at the solstices and rotates to a sideways lean at the equinoxes, tracing a full circle over the year</li>
                 <li><strong>Hour of the day</strong>: spins the Earth so the meridian facing the Sun matches the selected time</li>
                 <li><strong>3D view</strong>: the same tilt and lighting rendered as an actual sphere you can drag to look around — the camera stays level with the orbital plane, so the axial tilt always reads as a lean rather than a bird's-eye view</li>
             </ul>
@@ -547,6 +584,18 @@
         // actually varies through the year — the axial tilt itself never does.
         function declinationForMonth(month) {
             return 23.4 * Math.sin((2 * Math.PI * (month - 3)) / 12);
+        }
+
+        // Earth's axial tilt has a fixed magnitude (23.4°) but its orientation
+        // relative to the current Sun direction rotates over the year: at the
+        // solstices it points fully toward/away from the Sun (that's declination,
+        // above); at the equinoxes that component is zero, but the *same* 23.4° of
+        // tilt is still there — it just shows up entirely as a sideways lean instead.
+        // Declination and roll are the sin/cos parts of that one fixed-length tilt
+        // vector, decomposed against the current Sun direction, so they're always
+        // in quadrature (max roll when declination is 0, and vice versa).
+        function rollForMonth(month) {
+            return 23.4 * Math.cos((2 * Math.PI * (month - 3)) / 12);
         }
 
         const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -729,17 +778,27 @@
             drawSunGlyph(ctx, cx, cy, height * 0.045);
         }
 
-        // The subsolar point is at body latitude = declination(month) on whichever
-        // meridian currently faces the Sun. Rz(zAngle) first spins that meridian to
-        // longitude 0 (preserving its latitude, since a Z-rotation can't change
-        // latitude) — landing the subsolar point at (cos(dec), 0, sin(dec)). Ry(dec)
-        // then rotates that exact point onto (1,0,0), the output's dead center. Using
-        // an X-axis tilt here (as earlier code did) does not do this — it only
-        // centers the equator, leaving the true subsolar point off-center by exactly
-        // the declination whenever it's nonzero.
+        // Three rotations, applied in this order (innermost/rightmost first):
+        //   1. Rz(zAngle) spins the body so the meridian currently facing the Sun
+        //      sits at longitude 0, without touching latitude (a Z-rotation can't
+        //      change it) — so the subsolar point lands at (cos(dec), 0, sin(dec)).
+        //   2. Ry(dec) rotates that exact point onto (1,0,0): the Sun is now dead
+        //      center, for every month and hour — this never needs to be
+        //      recomputed for the Sun icon, which is why it's just drawn at the
+        //      canvas center in drawSunViewOverlay.
+        //   3. Rx(roll) rotates everything else *around* that now-centered point
+        //      (an X-axis rotation leaves (1,0,0) fixed, so the Sun stays put).
+        //      This is what makes the rest of Earth — the pole, the grid — show
+        //      its full 23.4° tilt year-round: at the solstices roll is 0 (the
+        //      tilt is entirely captured by declination above), but at the
+        //      equinoxes declination is 0 and the same fixed-magnitude tilt shows
+        //      up entirely as this sideways lean instead.
         const sunView = makeFlatView({
             canvasId: 'rotatedCanvas',
-            buildR: (zAngle, month) => matMul(rotationMatrixY(declinationForMonth(month)), rotationMatrixZ(zAngle)),
+            buildR: (zAngle, month) => matMul(
+                rotationMatrixX(rollForMonth(month)),
+                matMul(rotationMatrixY(declinationForMonth(month)), rotationMatrixZ(zAngle))
+            ),
             postCanvas: drawSunViewOverlay,
         });
 
@@ -752,7 +811,10 @@
             const alpha = new Float32Array(width * height);
             const decRad = deg2rad(declinationDeg);
             const sinDec = Math.sin(decRad), cosDec = Math.cos(decRad);
-            const band = 8.0;
+            // Widened to roughly match how far the Sun's-eye view's radial vignette
+            // softens toward its edges — a narrower band read as noticeably sharper
+            // than that view's blur for the same scene.
+            const band = 24.0;
             const maxAlpha = 190 / 255;
             for (let y = 0; y < height; y++) {
                 const latDeg = 90 - (y / (height - 1)) * 180;
@@ -972,6 +1034,16 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('N', nTip[0], nTip[1] - 6);
                 ctx.fillText('S', sTip[0], sTip[1] + 14);
+
+                // Sun marker at the subsolar point (the point on the surface directly
+                // facing the Sun, i.e. where brightness above would be at its max).
+                // Only drawn when it's on the near side of the globe (tDotSun, the
+                // Sun direction's component toward the viewer, is positive) — on the
+                // far side it would show through the opaque sphere.
+                if (tDotSun > 0) {
+                    const sunScreen = project(sunDir, 1.0);
+                    drawSunGlyph(ctx, sunScreen[0], sunScreen[1], radius * 0.07);
+                }
             }
 
             function scheduleRender() {
@@ -1018,6 +1090,20 @@
         const captionHour = document.getElementById('captionHour');
         const captionHourEarth = document.getElementById('captionHourEarth');
         const captionHourGlobe = document.getElementById('captionHourGlobe');
+
+        // Tick dots, one per selectable value, spaced with simple linear percentages
+        // so they land exactly evenly and line up with where the slider thumb stops.
+        function renderTicks(containerId, count) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const tick = document.createElement('span');
+                tick.style.left = `${(i / (count - 1)) * 100}%`;
+                container.appendChild(tick);
+            }
+        }
+        renderTicks('monthTicks', 12);
+        renderTicks('hourTicks', 25);
 
         // --- Orbit diagram: Earth's position around the Sun for the selected month.
         // Purely 2D/decorative — orbital position depends only on month (the hour of
@@ -1215,6 +1301,27 @@
         applyHour(playhead.hour);
         requestAnimationFrame(autoplayTick);
         loadTexture();
+
+        // Match the 3D view's height to a flat-map card's image height exactly, by
+        // measuring it directly rather than approximating with a fixed aspect-ratio
+        // (which can't account for the padding/gap constants that don't scale with
+        // width). Skipped below the 900px breakpoint, where the two halves stack
+        // vertically and should size from their own natural aspect ratio instead.
+        const splitPanelsEl = document.querySelector('.split-panels');
+        const referenceImageFrame = document.getElementById('earthCanvas').closest('.image-frame');
+
+        function syncGlobeRowHeight() {
+            if (!splitPanelsEl || !referenceImageFrame) return;
+            if (window.innerWidth <= 900) {
+                splitPanelsEl.style.height = '';
+                return;
+            }
+            const h = referenceImageFrame.getBoundingClientRect().height;
+            if (h > 0) splitPanelsEl.style.height = `${h}px`;
+        }
+
+        window.addEventListener('resize', syncGlobeRowHeight);
+        syncGlobeRowHeight();
     </script>
 </body>
 </html>
