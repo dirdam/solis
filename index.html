@@ -559,6 +559,10 @@
             const a = deg2rad(deg), c = Math.cos(a), s = Math.sin(a);
             return [[1, 0, 0], [0, c, -s], [0, s, c]];
         }
+        function rotationMatrixY(deg) {
+            const a = deg2rad(deg), c = Math.cos(a), s = Math.sin(a);
+            return [[c, 0, s], [0, 1, 0], [-s, 0, c]];
+        }
         function rotationMatrixZ(deg) {
             const a = deg2rad(deg), c = Math.cos(a), s = Math.sin(a);
             return [[c, -s, 0], [s, c, 0], [0, 0, 1]];
@@ -668,7 +672,7 @@
             return frame;
         }
 
-        function makeFlatView({ canvasId, xAngleForMonth, postCanvas }) {
+        function makeFlatView({ canvasId, buildR, postCanvas }) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             const width = canvas.width;
@@ -681,8 +685,7 @@
             function render() {
                 if (!texData) return;
                 const zAngle = hourToZAngle(hour);
-                const xAngleDeg = xAngleForMonth ? xAngleForMonth(month) : 0;
-                const R = matMul(rotationMatrixX(xAngleDeg), rotationMatrixZ(zAngle));
+                const R = buildR ? buildR(zAngle, month) : rotationMatrixZ(zAngle);
 
                 const frame = renderEquirectFrame(ctx, width, height, grid, R);
                 ctx.putImageData(frame, 0, 0);
@@ -711,11 +714,9 @@
 
         // Sun's-eye view: soft-edged circle marks the visible (sunlit) disc versus
         // the dimmed far side — a radial gradient gives the same soft terminator
-        // look the day/night overlay uses, without needing a blur filter. The month's
-        // effect here is on the Earth's own representation (the tilt applied before
-        // reprojecting), not a moving Sun icon: since this view is always centered on
-        // whichever meridian currently faces the Sun, the Sun itself is always drawn
-        // dead center rather than computed from hour/declination like the Earth view.
+        // look the day/night overlay uses, without needing a blur filter. The Sun
+        // itself is always drawn dead center, because the rotation below is built
+        // specifically to put the true current subsolar point there.
         function drawSunViewOverlay(ctx, width, height) {
             const cx = width / 2, cy = height / 2;
             const r = Math.min(width, height) / 2;
@@ -728,9 +729,17 @@
             drawSunGlyph(ctx, cx, cy, height * 0.045);
         }
 
+        // The subsolar point is at body latitude = declination(month) on whichever
+        // meridian currently faces the Sun. Rz(zAngle) first spins that meridian to
+        // longitude 0 (preserving its latitude, since a Z-rotation can't change
+        // latitude) — landing the subsolar point at (cos(dec), 0, sin(dec)). Ry(dec)
+        // then rotates that exact point onto (1,0,0), the output's dead center. Using
+        // an X-axis tilt here (as earlier code did) does not do this — it only
+        // centers the equator, leaving the true subsolar point off-center by exactly
+        // the declination whenever it's nonzero.
         const sunView = makeFlatView({
             canvasId: 'rotatedCanvas',
-            xAngleForMonth: (month) => -declinationForMonth(month),
+            buildR: (zAngle, month) => matMul(rotationMatrixY(declinationForMonth(month)), rotationMatrixZ(zAngle)),
             postCanvas: drawSunViewOverlay,
         });
 
