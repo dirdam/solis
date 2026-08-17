@@ -138,6 +138,15 @@
 
         .orbit-panel,
         .split-panels .globe-frame {
+            /* Override the desktop "flex: 1 1 0" — with flex-basis 0 and no fixed
+               height on the now-column .split-panels, the browser has nothing to
+               grow the item's height from, and it can collapse to 0 (this is what
+               was hiding the globe: its own aspect-ratio couldn't rescue it because
+               aspect-ratio and a 0 flex-basis interact unreliably; the orbit panel
+               only survived because ITS aspect-ratio lives on a child canvas, not
+               itself). flex: none + height: auto lets each panel size purely from
+               its own content/aspect-ratio instead. */
+            flex: none;
             height: auto;
             width: 100%;
         }
@@ -147,7 +156,11 @@
             height: auto;
         }
 
-        .split-panels .globe-frame {
+        /* Extra ancestor qualifier so this outranks the later, equally-specific
+           .image-frame.globe-frame { aspect-ratio: auto; } base rule — otherwise
+           that rule wins on source order alone (same specificity, appears later),
+           silently canceling this and leaving the globe with no height on mobile. */
+        .globe-row .split-panels .globe-frame {
             aspect-ratio: 520 / 430;
         }
     }
