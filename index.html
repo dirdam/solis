@@ -101,7 +101,53 @@
 
     .globe-row .view-card {
         width: 100%;
+    }
+
+    .split-panels {
+        display: flex;
+        gap: 28px;
+        align-items: center;
+    }
+
+    .orbit-panel {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .orbit-panel h4 {
+        font-size: 0.8em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+
+    .orbit-panel canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .split-panels .globe-frame {
+        flex: 1 1 0;
+        min-width: 0;
         max-width: 480px;
+    }
+
+    @media screen and (max-width: 900px) {
+        .split-panels {
+            flex-direction: column;
+        }
+
+        .split-panels .globe-frame {
+            max-width: 100%;
+            width: 100%;
+        }
     }
 
     .views {
@@ -206,6 +252,10 @@
         margin-bottom: 24px;
     }
 
+    .slider-group + .slider-group {
+        margin-top: 26px;
+    }
+
     .control-panel label {
         display: flex;
         justify-content: space-between;
@@ -221,7 +271,8 @@
         letter-spacing: 1px;
     }
 
-    #hourValue {
+    #hourValue,
+    #monthValue {
         font-size: 1.4em;
         font-weight: 800;
         color: var(--accent);
@@ -297,10 +348,6 @@
             grid-template-columns: 1fr;
         }
 
-        .globe-row .view-card {
-            max-width: 100%;
-        }
-
         header h1 {
             font-size: 1.8em;
         }
@@ -344,11 +391,17 @@
                     <h3>3D view</h3>
                     <button type="button" id="resetGlobeBtn" class="reset-btn">Reset view</button>
                 </div>
-                <div class="image-frame globe-frame">
-                    <canvas id="globeCanvas" width="520" height="430" aria-label="Draggable 3D globe showing Earth's axial tilt, with the night side dark"></canvas>
+                <div class="split-panels">
+                    <div class="orbit-panel">
+                        <h4>Earth's orbit</h4>
+                        <canvas id="orbitCanvas" width="480" height="320" aria-label="Earth's position in its orbit around the Sun for the selected month"></canvas>
+                    </div>
+                    <div class="image-frame globe-frame">
+                        <canvas id="globeCanvas" width="600" height="496" aria-label="Draggable 3D globe showing Earth's axial tilt, with the night side dark"></canvas>
+                    </div>
                 </div>
                 <div class="view-caption">
-                    Drag to look around &middot; night side dark &middot; <span class="highlight" id="captionHourGlobe">12:00</span> UTC
+                    Drag the globe to look around &middot; night side dark &middot; <span class="highlight" id="captionMonthGlobe">June</span>, <span class="highlight" id="captionHourGlobe">12:00</span> UTC
                 </div>
             </div>
         </div>
@@ -379,23 +432,39 @@
         </div>
 
         <div class="control-panel">
-            <label>
-                <span>Hour of the day (UTC)</span>
-                <span id="hourValue">12:00</span>
-            </label>
-            <input type="range" id="hourSlider" min="0" max="24" step="1" value="12">
-            <div class="scale-labels">
-                <span>00:00</span>
-                <span>06:00</span>
-                <span>12:00</span>
-                <span>18:00</span>
-                <span>24:00</span>
+            <div class="slider-group">
+                <label>
+                    <span>Month of the year</span>
+                    <span id="monthValue">June</span>
+                </label>
+                <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
+                <div class="scale-labels">
+                    <span>Jan</span>
+                    <span>Apr</span>
+                    <span>Jul</span>
+                    <span>Oct</span>
+                    <span>Dec</span>
+                </div>
+            </div>
+            <div class="slider-group">
+                <label>
+                    <span>Hour of the day (UTC)</span>
+                    <span id="hourValue">12:00</span>
+                </label>
+                <input type="range" id="hourSlider" min="0" max="24" step="1" value="12">
+                <div class="scale-labels">
+                    <span>00:00</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
+                    <span>24:00</span>
+                </div>
             </div>
         </div>
 
         <div class="panel how-it-works">
             <h2>How it works</h2>
-            <p>This app renders Earth from the Sun's perspective at a given hour of the day by:</p>
+            <p>This app renders Earth from the Sun's perspective at a given month and hour by:</p>
             <ul>
                 <li>Mapping the equirectangular projection onto a 3D sphere</li>
                 <li>Tilting it by Earth's fixed axial tilt (~23.5°) relative to the solar system's plane</li>
@@ -403,7 +472,8 @@
                 <li>Reprojecting back to an equirectangular view</li>
             </ul>
             <ul style="margin-top: 16px;">
-                <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt relative to the orbital plane</li>
+                <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt — this never changes with the seasons, only Earth's orientation relative to the Sun does</li>
+                <li><strong>Month of the year</strong>: sets how directly the Sun's light falls on each hemisphere, from a full tilt toward the Sun at the solstices to none at the equinoxes — shown as the Sun's-eye view's Earth tilt, the day/night terminator and Sun marker in Earth's own view, and the lit side of the 3D globe</li>
                 <li><strong>Hour of the day</strong>: spins the Earth so the meridian facing the Sun matches the selected time</li>
                 <li><strong>3D view</strong>: the same tilt and lighting rendered as an actual sphere you can drag to look around — the camera stays level with the orbital plane, so the axial tilt always reads as a lean rather than a bird's-eye view</li>
             </ul>
@@ -412,8 +482,19 @@
 
     <script>
         // --- Shared math (mirrors the app's Python rotation model exactly) ------
-        const AXIAL_TILT_DEG = 24;
-        const DECLINATION_DEG = 23.4; // no calendar input; fixed solstice-like terminator curve
+        const AXIAL_TILT_DEG = 24; // Earth's real axial tilt — fixed, never changes with season
+
+        // Solar declination (the Sun's apparent latitude) as a function of month,
+        // approximated as a sine wave: 0 at the equinoxes (Mar/Sep), maxing out at
+        // Earth's real ~23.4° axial tilt at the solstices (Jun/Dec). This is what
+        // actually varies through the year — the axial tilt itself never does.
+        function declinationForMonth(month) {
+            return 23.4 * Math.sin((2 * Math.PI * (month - 3)) / 12);
+        }
+
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+        function formatMonth(month) { return MONTH_NAMES[month - 1]; }
 
         function deg2rad(d) { return (d * Math.PI) / 180; }
 
@@ -472,18 +553,14 @@
 
         // --- Flat equirectangular views (Earth's-own-view and Sun's-eye view) --
         // Both are the same reprojection algorithm the app always used, just run
-        // client-side now: a fixed axial tilt plus an hour-dependent spin, resampled
+        // client-side now: an axial tilt plus an hour-dependent spin, resampled
         // into the same equirectangular grid. Rendering locally means the hour
         // slider redraws instantly with no network round-trip (and nothing to
         // accidentally cache stale, which is what caused the earlier blur bug).
-        function makeFlatView({ canvasId, xAngleDeg, prePixel, postCanvas }) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
 
-            // Per-pixel unit-sphere coordinates for the OUTPUT grid — fixed layout,
-            // independent of hour, so this is computed once up front.
+        // Per-pixel unit-sphere coordinates for an equirectangular OUTPUT grid of a
+        // given size — fixed layout, independent of hour/month/tilt.
+        function computeSphereGrid(width, height) {
             const vx = new Float32Array(width * height);
             const vy = new Float32Array(width * height);
             const vz = new Float32Array(width * height);
@@ -498,41 +575,58 @@
                     vz[i] = sinLat;
                 }
             }
+            return { vx, vy, vz };
+        }
+
+        // Reproject the texture through rotation R onto an equirectangular ImageData.
+        function renderEquirectFrame(ctx, width, height, grid, R) {
+            const Rt = transpose(R);
+            const frame = ctx.createImageData(width, height);
+            const out = frame.data;
+            const { vx, vy, vz } = grid;
+
+            for (let i = 0; i < width * height; i++) {
+                const x = vx[i], y = vy[i], z = vz[i];
+                const sx = Rt[0][0] * x + Rt[0][1] * y + Rt[0][2] * z;
+                const sy = Rt[1][0] * x + Rt[1][1] * y + Rt[1][2] * z;
+                const sz = Rt[2][0] * x + Rt[2][1] * y + Rt[2][2] * z;
+
+                const lon = Math.atan2(sy, sx);
+                const lat = Math.asin(Math.max(-1, Math.min(1, sz)));
+
+                let tx = Math.floor(((lon + Math.PI) / (2 * Math.PI)) * texW) % texW;
+                if (tx < 0) tx += texW;
+                let ty = Math.floor(((Math.PI / 2 - lat) / Math.PI) * texH);
+                if (ty < 0) ty = 0; else if (ty >= texH) ty = texH - 1;
+
+                const ti = (ty * texW + tx) * 4;
+                const oi = i * 4;
+                out[oi] = texData[ti];
+                out[oi + 1] = texData[ti + 1];
+                out[oi + 2] = texData[ti + 2];
+                out[oi + 3] = 255;
+            }
+
+            return frame;
+        }
+
+        function makeFlatView({ canvasId, xAngleForMonth, postCanvas }) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const grid = computeSphereGrid(width, height);
 
             let hour = 12;
+            let month = 6;
 
             function render() {
                 if (!texData) return;
                 const zAngle = hourToZAngle(hour);
+                const xAngleDeg = xAngleForMonth ? xAngleForMonth(month) : 0;
                 const R = matMul(rotationMatrixX(xAngleDeg), rotationMatrixZ(zAngle));
-                const Rt = transpose(R);
 
-                const frame = ctx.createImageData(width, height);
-                const out = frame.data;
-
-                for (let i = 0; i < width * height; i++) {
-                    const x = vx[i], y = vy[i], z = vz[i];
-                    const sx = Rt[0][0] * x + Rt[0][1] * y + Rt[0][2] * z;
-                    const sy = Rt[1][0] * x + Rt[1][1] * y + Rt[1][2] * z;
-                    const sz = Rt[2][0] * x + Rt[2][1] * y + Rt[2][2] * z;
-
-                    const lon = Math.atan2(sy, sx);
-                    const lat = Math.asin(Math.max(-1, Math.min(1, sz)));
-
-                    let tx = Math.floor(((lon + Math.PI) / (2 * Math.PI)) * texW) % texW;
-                    if (tx < 0) tx += texW;
-                    let ty = Math.floor(((Math.PI / 2 - lat) / Math.PI) * texH);
-                    if (ty < 0) ty = 0; else if (ty >= texH) ty = texH - 1;
-
-                    const ti = (ty * texW + tx) * 4;
-                    const oi = i * 4;
-                    out[oi] = texData[ti];
-                    out[oi + 1] = texData[ti + 1];
-                    out[oi + 2] = texData[ti + 2];
-                    out[oi + 3] = 255;
-                }
-
-                if (prePixel) prePixel(out, width, height);
+                const frame = renderEquirectFrame(ctx, width, height, grid, R);
                 ctx.putImageData(frame, 0, 0);
                 if (postCanvas) postCanvas(ctx, width, height);
             }
@@ -541,12 +635,17 @@
 
             return {
                 setHour(h) { hour = h; render(); },
+                setMonth(m) { month = m; render(); },
             };
         }
 
         // Sun's-eye view: soft-edged circle marks the visible (sunlit) disc versus
         // the dimmed far side — a radial gradient gives the same soft terminator
-        // look the day/night overlay uses, without needing a blur filter.
+        // look the day/night overlay uses, without needing a blur filter. This has
+        // no separate Sun icon or day/night shading, so the month's effect here is
+        // entirely on the Earth's own representation: the tilt applied before
+        // reprojecting varies with the season, from a full ~23.4° lean at the
+        // solstices down to no tilt at all at the equinoxes.
         function drawSunViewOverlay(ctx, width, height) {
             const cx = width / 2, cy = height / 2;
             const r = Math.min(width, height) / 2;
@@ -557,12 +656,20 @@
             ctx.fillRect(0, 0, width, height);
         }
 
-        // Earth's-own view: night-side shading, precomputed once since (like the
-        // rotation itself) the current subsolar meridian is always centered here,
-        // so the terminator's position in display coordinates never depends on hour.
-        function makeNightAlpha(width, height) {
+        const sunView = makeFlatView({
+            canvasId: 'rotatedCanvas',
+            xAngleForMonth: (month) => -declinationForMonth(month),
+            postCanvas: drawSunViewOverlay,
+        });
+
+        // Earth's-own view: no tilt is applied here (it's always Earth's own,
+        // north-up frame) — instead the month moves the Sun marker's latitude and
+        // the night-side terminator, both driven by the same seasonal declination.
+        // The night-alpha mask only depends on month, not hour, so it's cached and
+        // only recomputed when the month actually changes.
+        function makeNightAlpha(width, height, declinationDeg) {
             const alpha = new Float32Array(width * height);
-            const decRad = deg2rad(DECLINATION_DEG);
+            const decRad = deg2rad(declinationDeg);
             const sinDec = Math.sin(decRad), cosDec = Math.cos(decRad);
             const band = 8.0;
             const maxAlpha = 190 / 255;
@@ -581,12 +688,9 @@
             return alpha;
         }
 
-        const earthCanvasEl = document.getElementById('earthCanvas');
-        const earthNightAlpha = makeNightAlpha(earthCanvasEl.width, earthCanvasEl.height);
-
-        function applyNightShade(out, width, height) {
+        function applyNightShade(out, width, height, nightAlpha) {
             for (let i = 0; i < width * height; i++) {
-                const a = earthNightAlpha[i];
+                const a = nightAlpha[i];
                 if (a === 0) continue;
                 const oi = i * 4;
                 out[oi] = out[oi] * (1 - a) + 6 * a;
@@ -595,9 +699,9 @@
             }
         }
 
-        function drawSunMarker(ctx, width, height) {
+        function drawSunMarker(ctx, width, height, declinationDeg) {
             const sunX = width / 2;
-            const sunY = ((90 - DECLINATION_DEG) / 180) * height;
+            const sunY = ((90 - declinationDeg) / 180) * height;
             const r = height * 0.045;
             ctx.fillStyle = 'rgba(255, 200, 80, 0.35)';
             ctx.beginPath();
@@ -609,17 +713,46 @@
             ctx.fill();
         }
 
-        const sunView = makeFlatView({
-            canvasId: 'rotatedCanvas',
-            xAngleDeg: -AXIAL_TILT_DEG,
-            postCanvas: drawSunViewOverlay,
-        });
-        const earthView = makeFlatView({
-            canvasId: 'earthCanvas',
-            xAngleDeg: 0,
-            prePixel: applyNightShade,
-            postCanvas: drawSunMarker,
-        });
+        // Earth's-own view: never tilted (always Earth's own north-up frame) — only
+        // the daily spin applies. The month instead moves the Sun marker's latitude
+        // and the night-side terminator, both driven by the same seasonal
+        // declination. The night-alpha mask only depends on month, not hour, so
+        // it's cached and only recomputed when the month actually changes.
+        function makeEarthView(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const grid = computeSphereGrid(width, height);
+
+            let hour = 12;
+            let month = 6;
+            let nightAlpha = makeNightAlpha(width, height, declinationForMonth(month));
+
+            function render() {
+                if (!texData) return;
+                const zAngle = hourToZAngle(hour);
+                const R = rotationMatrixZ(zAngle);
+
+                const frame = renderEquirectFrame(ctx, width, height, grid, R);
+                applyNightShade(frame.data, width, height, nightAlpha);
+                ctx.putImageData(frame, 0, 0);
+                drawSunMarker(ctx, width, height, declinationForMonth(month));
+            }
+
+            onTextureReady.push(render);
+
+            return {
+                setHour(h) { hour = h; render(); },
+                setMonth(m) {
+                    month = m;
+                    nightAlpha = makeNightAlpha(width, height, declinationForMonth(m));
+                    render();
+                },
+            };
+        }
+
+        const earthView = makeEarthView('earthCanvas');
 
         // --- Draggable 3D globe -------------------------------------------------
         // Uses the same rotation math as the flat maps above, so the lit/dark side
@@ -677,6 +810,7 @@
 
             let azimuth = DEFAULT_AZIMUTH;
             let hour = 12;
+            let month = 6;
             let dragging = false;
             let dragStartX = 0;
             let dragStartAzimuth = 0;
@@ -694,6 +828,15 @@
                 // so precompute A = Q^T.right, B = Q^T.up, C = Q^T.towardViewer once per
                 // frame; per pixel p_body is just nx*A + ny*B + nz*C.
                 const A = matVec(Qt, right), B = matVec(Qt, up), C = matVec(Qt, towardViewer);
+
+                // The Sun's direction tilts up/down out of the orbital plane with the
+                // season (the axis itself doesn't move — "adjusting the facing of the
+                // Earth to the sun" is modeled as the Sun's apparent direction shifting).
+                const dec = deg2rad(declinationForMonth(month));
+                const sunDir = [Math.cos(dec), 0, Math.sin(dec)];
+                const rDotSun = right[0] * sunDir[0] + right[1] * sunDir[1] + right[2] * sunDir[2];
+                const uDotSun = up[0] * sunDir[0] + up[1] * sunDir[1] + up[2] * sunDir[2];
+                const tDotSun = towardViewer[0] * sunDir[0] + towardViewer[1] * sunDir[1] + towardViewer[2] * sunDir[2];
 
                 const frame = ctx.createImageData(W, H);
                 const out = frame.data;
@@ -714,9 +857,9 @@
 
                     const ti = (ty * texW + tx) * 4;
 
-                    // brightness = dot(p_world, SUN_DIR); SUN_DIR is world +X, so this is
-                    // just the world-space X component: nx*right.x + ny*up.x + nz*towardViewer.x
-                    const brightness = nx * right[0] + ny * up[0] + nz * towardViewer[0];
+                    // brightness = dot(p_world, sunDir), computed via the precomputed
+                    // per-axis dot products above (p_world = nx*right + ny*up + nz*towardViewer).
+                    const brightness = nx * rDotSun + ny * uDotSun + nz * tDotSun;
                     const shade = AMBIENT + (1 - AMBIENT) * Math.max(0, brightness);
 
                     const oi = (y * W + x) * 4;
@@ -782,18 +925,137 @@
 
             return {
                 setHour(h) { hour = h; scheduleRender(); },
+                setMonth(m) { month = m; scheduleRender(); },
                 reset() { azimuth = DEFAULT_AZIMUTH; scheduleRender(); },
             };
         })();
 
         document.getElementById('resetGlobeBtn').addEventListener('click', () => globe.reset());
 
-        // --- Hour slider: drives all three views, fully client-side -------------
+        // --- Month and hour sliders: drive all three views, fully client-side ---
+        const monthSlider = document.getElementById('monthSlider');
+        const monthValue = document.getElementById('monthValue');
+        const captionMonthGlobe = document.getElementById('captionMonthGlobe');
         const slider = document.getElementById('hourSlider');
         const hourValue = document.getElementById('hourValue');
         const captionHour = document.getElementById('captionHour');
         const captionHourEarth = document.getElementById('captionHourEarth');
         const captionHourGlobe = document.getElementById('captionHourGlobe');
+
+        // --- Orbit diagram: Earth's position around the Sun for the selected month.
+        // Purely 2D/decorative — orbital position depends only on month (the hour of
+        // day only spins Earth in place, it doesn't move it along the orbit), so this
+        // never needs the texture and can draw immediately.
+        function orbitPosition(month, cx, cy, rx, ry) {
+            const angle = deg2rad((month - 3) * 30);
+            return { x: cx - rx * Math.sin(angle), y: cy - ry * Math.cos(angle) };
+        }
+
+        function drawMiniEarth(ctx, x, y, r, highlighted) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = '#2f7fb8';
+            ctx.fill();
+            ctx.clip();
+            ctx.fillStyle = '#3f9142';
+            ctx.beginPath();
+            ctx.ellipse(x - r * 0.3, y - r * 0.2, r * 0.55, r * 0.4, 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + r * 0.4, y + r * 0.35, r * 0.4, r * 0.3, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Axial tilt: a fixed direction in space, the same for every orbital
+            // position — it's Earth's changing position around the Sun that creates
+            // the seasons, not the tilt itself moving.
+            const tiltRad = deg2rad(23.4);
+            const axisLen = r * 1.7;
+            const dx = Math.sin(tiltRad) * axisLen * 0.5;
+            const dy = Math.cos(tiltRad) * axisLen * 0.5;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x - dx, y + dy);
+            ctx.lineTo(x + dx, y - dy);
+            ctx.stroke();
+
+            if (highlighted) {
+                ctx.strokeStyle = 'rgba(255, 179, 71, 0.9)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, r + 4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function drawOrbitDiagram(month) {
+            const canvas = document.getElementById('orbitCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            const cx = W / 2, cy = H / 2;
+            const rx = W * 0.36, ry = H * 0.3;
+
+            ctx.clearRect(0, 0, W, H);
+
+            ctx.strokeStyle = 'rgba(174, 180, 199, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const sunR = Math.min(W, H) * 0.09;
+            const glow = ctx.createRadialGradient(cx, cy, sunR * 0.3, cx, cy, sunR * 1.8);
+            glow.addColorStop(0, 'rgba(255, 200, 80, 0.9)');
+            glow.addColorStop(1, 'rgba(255, 200, 80, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(cx, cy, sunR * 1.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffb03b';
+            ctx.beginPath();
+            ctx.arc(cx, cy, sunR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(241, 243, 248, 0.85)';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Sun', cx, cy + sunR + 16);
+
+            const seasonPoints = [
+                { m: 3, label: 'March equinox' },
+                { m: 6, label: 'June solstice' },
+                { m: 9, label: 'September equinox' },
+                { m: 12, label: 'December solstice' },
+            ];
+            ctx.font = '11px sans-serif';
+            for (const { m, label } of seasonPoints) {
+                const p = orbitPosition(m, cx, cy, rx, ry);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(174, 180, 199, 0.6)';
+                ctx.fill();
+                ctx.fillStyle = 'rgba(174, 180, 199, 0.85)';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, p.x, p.y < cy ? p.y - 10 : p.y + 18);
+            }
+
+            const current = orbitPosition(month, cx, cy, rx, ry);
+            drawMiniEarth(ctx, current.x, current.y, Math.min(W, H) * 0.075, true);
+        }
+
+        monthSlider.addEventListener('input', () => {
+            const month = Number(monthSlider.value);
+            monthValue.textContent = formatMonth(month);
+            captionMonthGlobe.textContent = formatMonth(month);
+
+            drawOrbitDiagram(month);
+            sunView.setMonth(month);
+            earthView.setMonth(month);
+            globe.setMonth(month);
+        });
 
         slider.addEventListener('input', () => {
             const hour = Number(slider.value);
@@ -808,6 +1070,7 @@
             globe.setHour(hour);
         });
 
+        drawOrbitDiagram(Number(monthSlider.value));
         loadTexture();
     </script>
 </body>
