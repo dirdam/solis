@@ -26,16 +26,16 @@
         color: var(--text-main);
         min-height: 100vh;
         padding: 32px 20px 60px;
-        background:
-            radial-gradient(1px 1px at 10% 20%, #fff, transparent),
-            radial-gradient(1px 1px at 80% 10%, #fff, transparent),
-            radial-gradient(1.5px 1.5px at 60% 70%, #fff, transparent),
-            radial-gradient(1px 1px at 30% 85%, #fff, transparent),
-            radial-gradient(1px 1px at 90% 60%, #fff, transparent),
-            radial-gradient(1.5px 1.5px at 45% 40%, #fff, transparent),
-            radial-gradient(1px 1px at 15% 55%, #fff, transparent),
+        /* Starfield: a small tile of ~70 stars with varied size/brightness/color
+           temperature (mostly dim, a few bright — matching how a real night sky's
+           star magnitudes are distributed), repeated across the page, over a dark
+           blue/indigo gradient base. */
+        background-image:
+            url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22480%22%20height%3D%22480%22%20viewBox%3D%220%200%20480%20480%22%3E%3Ccircle%20cx%3D%22306.9%22%20cy%3D%2212.0%22%20r%3D%220.42%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.43%22/%3E%3Ccircle%20cx%3D%22428.2%22%20cy%3D%2241.7%22%20r%3D%220.36%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.3%22/%3E%3Ccircle%20cx%3D%2212.7%22%20cy%3D%2295.4%22%20r%3D%220.51%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.31%22/%3E%3Ccircle%20cx%3D%22388.5%22%20cy%3D%223.1%22%20r%3D%220.84%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.55%22/%3E%3Ccircle%20cx%3D%22459.5%22%20cy%3D%22161.6%22%20r%3D%220.38%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.46%22/%3E%3Ccircle%20cx%3D%22387.4%22%20cy%3D%22350.3%22%20r%3D%220.64%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.34%22/%3E%3Ccircle%20cx%3D%22398.1%22%20cy%3D%22296.9%22%20r%3D%220.8%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.66%22/%3E%3Ccircle%20cx%3D%22109.4%22%20cy%3D%22138.9%22%20r%3D%220.42%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.28%22/%3E%3Ccircle%20cx%3D%22305.1%22%20cy%3D%22175.1%22%20r%3D%220.41%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.32%22/%3E%3Ccircle%20cx%3D%22311.1%22%20cy%3D%22292.4%22%20r%3D%220.57%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.29%22/%3E%3Ccircle%20cx%3D%22475.0%22%20cy%3D%22307.2%22%20r%3D%220.56%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.46%22/%3E%3Ccircle%20cx%3D%22109.9%22%20cy%3D%2215.4%22%20r%3D%220.43%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.3%22/%3E%3Ccircle%20cx%3D%22420.7%22%20cy%3D%22151.0%22%20r%3D%220.47%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.48%22/%3E%3Ccircle%20cx%3D%22127.1%22%20cy%3D%22118.4%22%20r%3D%220.43%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.4%22/%3E%3Ccircle%20cx%3D%22191.7%22%20cy%3D%22105.3%22%20r%3D%221.1%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.77%22/%3E%3Ccircle%20cx%3D%2252.6%22%20cy%3D%22301.2%22%20r%3D%220.75%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.47%22/%3E%3Ccircle%20cx%3D%22478.1%22%20cy%3D%22254.0%22%20r%3D%221.24%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.75%22/%3E%3Ccircle%20cx%3D%22327.2%22%20cy%3D%22257.7%22%20r%3D%220.54%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.28%22/%3E%3Ccircle%20cx%3D%22217.8%22%20cy%3D%22457.8%22%20r%3D%220.69%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.6%22/%3E%3Ccircle%20cx%3D%22438.1%22%20cy%3D%22417.8%22%20r%3D%220.54%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.4%22/%3E%3Ccircle%20cx%3D%22366.0%22%20cy%3D%22258.9%22%20r%3D%220.79%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.45%22/%3E%3Ccircle%20cx%3D%229.3%22%20cy%3D%22446.0%22%20r%3D%220.89%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.54%22/%3E%3Ccircle%20cx%3D%22421.4%22%20cy%3D%22454.5%22%20r%3D%220.5%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.27%22/%3E%3Ccircle%20cx%3D%22367.6%22%20cy%3D%2261.6%22%20r%3D%220.51%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.32%22/%3E%3Ccircle%20cx%3D%22203.1%22%20cy%3D%22101.7%22%20r%3D%220.57%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.3%22/%3E%3Ccircle%20cx%3D%22477.7%22%20cy%3D%22311.9%22%20r%3D%220.51%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.28%22/%3E%3Ccircle%20cx%3D%22162.3%22%20cy%3D%22282.4%22%20r%3D%220.42%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.27%22/%3E%3Ccircle%20cx%3D%22109.9%22%20cy%3D%22434.6%22%20r%3D%220.62%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.52%22/%3E%3Ccircle%20cx%3D%22102.8%22%20cy%3D%2263.5%22%20r%3D%221.13%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.87%22/%3E%3Ccircle%20cx%3D%22387.6%22%20cy%3D%2291.4%22%20r%3D%220.48%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.36%22/%3E%3Ccircle%20cx%3D%22350.0%22%20cy%3D%22323.2%22%20r%3D%220.94%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.85%22/%3E%3Ccircle%20cx%3D%22413.6%22%20cy%3D%22119.4%22%20r%3D%220.48%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.36%22/%3E%3Ccircle%20cx%3D%22119.9%22%20cy%3D%22443.2%22%20r%3D%220.61%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.39%22/%3E%3Ccircle%20cx%3D%22479.7%22%20cy%3D%22401.3%22%20r%3D%221.27%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.96%22/%3E%3Ccircle%20cx%3D%22233.1%22%20cy%3D%22102.6%22%20r%3D%220.37%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.34%22/%3E%3Ccircle%20cx%3D%22127.3%22%20cy%3D%22376.4%22%20r%3D%220.48%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.49%22/%3E%3Ccircle%20cx%3D%22266.8%22%20cy%3D%22344.8%22%20r%3D%220.44%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.49%22/%3E%3Ccircle%20cx%3D%22260.3%22%20cy%3D%22359.0%22%20r%3D%220.53%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.38%22/%3E%3Ccircle%20cx%3D%2275.6%22%20cy%3D%22461.2%22%20r%3D%220.41%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.4%22/%3E%3Ccircle%20cx%3D%22112.9%22%20cy%3D%2257.5%22%20r%3D%220.69%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.63%22/%3E%3Ccircle%20cx%3D%22201.2%22%20cy%3D%22280.2%22%20r%3D%220.63%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.3%22/%3E%3Ccircle%20cx%3D%22114.6%22%20cy%3D%22190.0%22%20r%3D%220.44%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.33%22/%3E%3Ccircle%20cx%3D%2234.8%22%20cy%3D%22220.0%22%20r%3D%221.3%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.77%22/%3E%3Ccircle%20cx%3D%22127.3%22%20cy%3D%22448.0%22%20r%3D%220.91%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.56%22/%3E%3Ccircle%20cx%3D%22400.2%22%20cy%3D%22337.7%22%20r%3D%220.65%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.41%22/%3E%3Ccircle%20cx%3D%22392.2%22%20cy%3D%22143.7%22%20r%3D%220.63%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.28%22/%3E%3Ccircle%20cx%3D%2251.4%22%20cy%3D%22265.5%22%20r%3D%220.53%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.43%22/%3E%3Ccircle%20cx%3D%22304.4%22%20cy%3D%22126.7%22%20r%3D%220.62%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.46%22/%3E%3Ccircle%20cx%3D%22203.3%22%20cy%3D%22132.8%22%20r%3D%220.58%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.41%22/%3E%3Ccircle%20cx%3D%22355.8%22%20cy%3D%22264.8%22%20r%3D%220.35%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.27%22/%3E%3Ccircle%20cx%3D%22433.9%22%20cy%3D%22261.9%22%20r%3D%220.8%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.49%22/%3E%3Ccircle%20cx%3D%22148.0%22%20cy%3D%22431.5%22%20r%3D%220.9%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.72%22/%3E%3Ccircle%20cx%3D%22119.8%22%20cy%3D%2249.3%22%20r%3D%220.91%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.57%22/%3E%3Ccircle%20cx%3D%2274.2%22%20cy%3D%22446.3%22%20r%3D%220.94%22%20fill%3D%22%23cfe3ff%22%20fill-opacity%3D%220.69%22/%3E%3Ccircle%20cx%3D%2211.9%22%20cy%3D%22353.6%22%20r%3D%220.63%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.45%22/%3E%3Ccircle%20cx%3D%22389.2%22%20cy%3D%22128.1%22%20r%3D%220.64%22%20fill%3D%22%23ffe9c9%22%20fill-opacity%3D%220.71%22/%3E%3Ccircle%20cx%3D%22106.8%22%20cy%3D%22392.0%22%20r%3D%220.44%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.45%22/%3E%3Ccircle%20cx%3D%2211.4%22%20cy%3D%2292.7%22%20r%3D%220.61%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.49%22/%3E%3Ccircle%20cx%3D%22307.9%22%20cy%3D%22191.8%22%20r%3D%221.11%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.98%22/%3E%3Ccircle%20cx%3D%22465.8%22%20cy%3D%2285.7%22%20r%3D%221.01%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.78%22/%3E%3Ccircle%20cx%3D%22349.7%22%20cy%3D%22150.6%22%20r%3D%220.5%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.35%22/%3E%3Ccircle%20cx%3D%22122.3%22%20cy%3D%22340.2%22%20r%3D%220.63%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.38%22/%3E%3Ccircle%20cx%3D%22356.1%22%20cy%3D%22321.9%22%20r%3D%220.37%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.42%22/%3E%3Ccircle%20cx%3D%22150.7%22%20cy%3D%22407.0%22%20r%3D%220.44%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.33%22/%3E%3Ccircle%20cx%3D%22193.2%22%20cy%3D%22141.9%22%20r%3D%220.48%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.49%22/%3E%3Ccircle%20cx%3D%22433.3%22%20cy%3D%22295.4%22%20r%3D%220.51%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.25%22/%3E%3Ccircle%20cx%3D%22206.3%22%20cy%3D%22278.4%22%20r%3D%220.49%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.36%22/%3E%3Ccircle%20cx%3D%22227.1%22%20cy%3D%22432.6%22%20r%3D%220.66%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.48%22/%3E%3Ccircle%20cx%3D%22303.8%22%20cy%3D%22160.9%22%20r%3D%220.86%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.65%22/%3E%3Ccircle%20cx%3D%2295.6%22%20cy%3D%2211.7%22%20r%3D%220.49%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.46%22/%3E%3C/svg%3E"),
             linear-gradient(160deg, #05061a 0%, #0b0f2e 45%, #1a1140 100%);
-        background-attachment: fixed;
+        background-repeat: repeat, no-repeat;
+        background-size: 480px 480px, cover;
+        background-attachment: fixed, fixed;
     }
 
     .container {
@@ -62,6 +62,33 @@
         color: var(--text-dim);
         margin-top: 8px;
         font-size: 1.05em;
+    }
+
+    header p.intro {
+        position: relative;
+        max-width: 560px;
+        margin: 28px auto 0;
+        padding-top: 22px;
+        font-size: 1.08em;
+        line-height: 1.7;
+        color: var(--text-dim);
+    }
+
+    header p.intro::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 52px;
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+    }
+
+    header p.intro strong {
+        color: var(--text-main);
+        font-weight: 600;
     }
 
     .panel {
@@ -91,6 +118,42 @@
 
     .panel p strong {
         color: var(--text-main);
+    }
+
+    .texture-toggle-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    .texture-toggle {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--panel-border);
+        border-radius: 999px;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .texture-toggle-option {
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        font-size: 0.78em;
+        font-weight: 600;
+        padding: 6px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .texture-toggle-option:hover {
+        color: var(--text-main);
+    }
+
+    .texture-toggle-option.active {
+        background: rgba(255, 179, 71, 0.18);
+        color: var(--accent);
     }
 
     .globe-row {
@@ -317,7 +380,7 @@
         }
 
         .play-pause-btn {
-            justify-self: start;
+            justify-self: center;
             margin-bottom: 20px;
         }
 
@@ -422,30 +485,45 @@
         white-space: nowrap;
     }
 
-    .how-it-works ul {
-        list-style: none;
-        margin-top: 12px;
-        display: grid;
-        gap: 8px;
-    }
-
-    .how-it-works li {
+    .how-it-works h3 {
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         color: var(--text-dim);
-        font-size: 0.9em;
-        line-height: 1.5;
-        padding-left: 18px;
-        position: relative;
+        font-weight: 700;
+        margin-top: 22px;
+        margin-bottom: 8px;
     }
 
-    .how-it-works li::before {
-        content: "\2022";
-        position: absolute;
-        left: 0;
+    .how-it-works h3:first-of-type {
+        margin-top: 4px;
+    }
+
+    .how-it-works p + p {
+        margin-top: 10px;
+    }
+
+    .how-it-works p strong {
         color: var(--accent);
     }
 
-    .how-it-works li strong {
-        color: var(--text-main);
+    footer {
+        text-align: center;
+        margin-top: 36px;
+        padding-top: 22px;
+        border-top: 1px solid var(--panel-border);
+        color: var(--text-dim);
+        font-size: 0.85em;
+    }
+
+    footer a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    footer a:hover {
+        text-decoration: underline;
     }
 
     @media screen and (max-width: 768px) {
@@ -468,26 +546,17 @@
         <header>
             <h1>☀️ Ex parte Solis</h1>
             <p>Earth from the Sun's point of view</p>
+            <p class="intro">
+                Every map of Earth you've ever seen is drawn from Earth's own point of view. This project
+                imagines the opposite: <strong>a projection of Earth as seen from the Sun.</strong>
+            </p>
         </header>
 
-        <div class="panel">
-            <h2>Earth's own reference frame</h2>
-            <p>
-                Earth is always shown here from <strong>Earth's own reference frame</strong>: the map is oriented
-                so that Earth's geographical north pole points to the top, exactly as in a standard world map.
-            </p>
-        </div>
-
-        <div class="panel">
-            <h2>The Sun's reference frame</h2>
-            <p>
-                This project instead asks what a map of Earth would look like from the <strong>Sun's</strong>
-                reference frame. Picture "solino" citizens living on the Sun: to draw a map, they would orient it
-                using the Sun's own geographical north and the plane of the solar system, not Earth's geographical
-                north. Because Earth's rotation axis is tilted relative to that plane, the resulting projection is
-                rotated compared to the familiar Earth-centered map. Use the slider below to explore how the map
-                changes as Earth spins through the hours of the day.
-            </p>
+        <div class="texture-toggle-row">
+            <div class="texture-toggle" role="group" aria-label="Earth texture">
+                <button type="button" id="textureBtnCoordinated" class="texture-toggle-option active" aria-pressed="true">Coordinated map</button>
+                <button type="button" id="textureBtnReal" class="texture-toggle-option" aria-pressed="false">Real map</button>
+            </div>
         </div>
 
         <div class="globe-row">
@@ -505,7 +574,7 @@
                     </div>
                 </div>
                 <div class="view-caption">
-                    Drag the globe to look around &middot; night side dark &middot; <span class="highlight" id="captionMonthGlobe">June</span>, <span class="highlight" id="captionHourGlobe">00:00</span> UTC
+                    Drag the globe to look around
                 </div>
             </div>
         </div>
@@ -546,9 +615,6 @@
                 <div class="image-frame">
                     <canvas id="earthCanvas" width="760" height="378" aria-label="Earth from Earth's own view, with day and night shaded"></canvas>
                 </div>
-                <div class="view-caption">
-                    Top = Earth's geographical north &middot; spun for <span class="highlight" id="captionHourEarth">00:00</span> UTC
-                </div>
             </div>
             <div class="view-card">
                 <div class="view-card-header">
@@ -557,28 +623,57 @@
                 <div class="image-frame">
                     <canvas id="rotatedCanvas" width="760" height="378" aria-label="Earth from the Sun's view"></canvas>
                 </div>
-                <div class="view-caption">
-                    Rotated for <span class="highlight" id="captionHour">00:00</span> UTC
-                </div>
             </div>
         </div>
 
         <div class="panel how-it-works">
-            <h2>How it works</h2>
-            <p>This app renders Earth from the Sun's perspective at a given month and hour by:</p>
-            <ul>
-                <li>Mapping the equirectangular projection onto a 3D sphere</li>
-                <li>Tilting it by Earth's fixed axial tilt (~23.5°) relative to the solar system's plane</li>
-                <li>Spinning it around its polar axis to match the selected hour of the day</li>
-                <li>Reprojecting back to an equirectangular view</li>
-            </ul>
-            <ul style="margin-top: 16px;">
-                <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt — this never changes with the seasons, only Earth's orientation relative to the Sun does</li>
-                <li><strong>Month of the year</strong>: sets how directly the Sun's light falls on each hemisphere, from a full tilt toward the Sun at the solstices to none at the equinoxes — shown in the day/night terminator and Sun marker in Earth's own view and the lit side of the 3D globe. In the Sun's-eye view, Earth's full 23.4° tilt is always visible (the Sun itself stays fixed at dead center): it leans toward/away from the Sun at the solstices and rotates to a sideways lean at the equinoxes, tracing a full circle over the year</li>
-                <li><strong>Hour of the day</strong>: spins the Earth so the meridian facing the Sun matches the selected time</li>
-                <li><strong>3D view</strong>: the same tilt and lighting rendered as an actual sphere you can drag to look around — the camera stays level with the orbital plane, so the axial tilt always reads as a lean rather than a bird's-eye view</li>
-            </ul>
+            <h2>What the views show</h2>
+
+            <h3>3D view</h3>
+            <p>
+                Earth rendered as an actual lit sphere: the night side is shaded dark, and a small marker
+                sits at the point on Earth's surface directly facing the Sun right now. Drag the globe to
+                look around — it starts facing the sunlit side, and the camera always stays level with the
+                plane the planets orbit in, so Earth's axial tilt reads as a lean rather than a bird's-eye
+                view. The orbit diagram beside it shows where Earth currently sits on its yearly path around
+                the Sun.
+            </p>
+
+            <h3>Original Earth view</h3>
+            <p>
+                Earth shown the ordinary way, with Earth's own geographical north pole at the top — exactly
+                like the maps you already know. Moving the hour slider spins the map in place so the
+                meridian currently facing the Sun stays centered; the shaded night side and Sun marker track
+                the real day/night line and the point directly under the Sun for the selected month and hour.
+            </p>
+
+            <h3>Sun's-eye view</h3>
+            <p>
+                This is the project's core idea: the same map of Earth, redrawn as if it were made from the
+                Sun's own point of view instead of Earth's. The Sun is always exactly at the center of this
+                map — that's not incidental, it's what the projection is built to guarantee.
+            </p>
+            <p>
+                Getting there takes three rotations. First, the map spins by the hour, so the meridian
+                currently facing the Sun sits at the front. Then it tilts by the current
+                <strong>declination</strong> — how far north or south of the equator the Sun sits directly
+                overhead, which depends on the month — so that exact point lands dead center. Finally, it
+                <strong>rolls</strong> sideways by an amount that keeps Earth's real 23.4° axial tilt fully
+                visible all year. Declination and roll are two faces of that one fixed tilt: declination
+                peaks at the solstices, when Earth leans fully toward or away from the Sun, and drops to
+                zero at the equinoxes — while roll does the exact opposite. So the tilt you see never
+                disappears, it just rotates direction as Earth moves around its orbit.
+            </p>
         </div>
+
+        <footer>
+            <p>
+                &copy; <span id="footerYear"></span>
+                <a href="https://dirdam.github.io" target="_blank" rel="noopener noreferrer">Adri&aacute;n Jim&eacute;nez Pascual</a>
+                &middot;
+                <a href="https://dirdam.squadro.app" target="_blank" rel="noopener noreferrer">See more tools</a>
+            </p>
+        </footer>
     </div>
 
     <script>
@@ -650,10 +745,16 @@
         }
 
         // --- Shared texture, loaded once and shared by all three views ---------
+        // Two selectable sources: an illustrated equirectangular projection map
+        // (default) and true-color satellite imagery. Switching just reloads this
+        // shared texture and re-fires every view's already-registered render
+        // callback below — no per-view wiring needed.
         let texData = null, texW = 0, texH = 0;
+        let currentTextureSrc = 'projection';
         const onTextureReady = [];
 
-        function loadTexture() {
+        function loadTexture(src) {
+            if (src) currentTextureSrc = src;
             const img = new Image();
             img.onload = () => {
                 const off = document.createElement('canvas');
@@ -666,7 +767,10 @@
                 texH = img.height;
                 onTextureReady.forEach((fn) => fn());
             };
-            img.src = '/api/texture.png';
+            img.onerror = () => {
+                console.error('Failed to load texture:', img.src);
+            };
+            img.src = currentTextureSrc === 'true' ? '/api/texture.png?src=true' : '/api/texture.png';
         }
 
         // --- Flat equirectangular views (Earth's-own-view and Sun's-eye view) --
@@ -1088,15 +1192,26 @@
 
         document.getElementById('resetGlobeBtn').addEventListener('click', () => globe.reset());
 
+        const textureBtnCoordinated = document.getElementById('textureBtnCoordinated');
+        const textureBtnReal = document.getElementById('textureBtnReal');
+
+        function setTextureSrc(src) {
+            if (src === currentTextureSrc) return;
+            textureBtnCoordinated.classList.toggle('active', src === 'projection');
+            textureBtnReal.classList.toggle('active', src === 'true');
+            textureBtnCoordinated.setAttribute('aria-pressed', String(src === 'projection'));
+            textureBtnReal.setAttribute('aria-pressed', String(src === 'true'));
+            loadTexture(src);
+        }
+
+        textureBtnCoordinated.addEventListener('click', () => setTextureSrc('projection'));
+        textureBtnReal.addEventListener('click', () => setTextureSrc('true'));
+
         // --- Month and hour sliders: drive all three views, fully client-side ---
         const monthSlider = document.getElementById('monthSlider');
         const monthValue = document.getElementById('monthValue');
-        const captionMonthGlobe = document.getElementById('captionMonthGlobe');
         const slider = document.getElementById('hourSlider');
         const hourValue = document.getElementById('hourValue');
-        const captionHour = document.getElementById('captionHour');
-        const captionHourEarth = document.getElementById('captionHourEarth');
-        const captionHourGlobe = document.getElementById('captionHourGlobe');
 
         // Tick dots, one per selectable value, spaced with simple linear percentages
         // so they land exactly evenly and line up with where the slider thumb stops.
@@ -1256,7 +1371,6 @@
         function applyMonth(month) {
             monthSlider.value = month;
             monthValue.textContent = formatMonth(month);
-            captionMonthGlobe.textContent = formatMonth(month);
 
             drawOrbitDiagram(month);
             sunView.setMonth(month);
@@ -1268,9 +1382,6 @@
             slider.value = hour;
             const label = formatHour(hour);
             hourValue.textContent = label;
-            captionHour.textContent = label;
-            captionHourEarth.textContent = label;
-            captionHourGlobe.textContent = label;
 
             sunView.setHour(hour);
             earthView.setHour(hour);
@@ -1366,6 +1477,8 @@
 
         window.addEventListener('resize', syncGlobeRowHeight);
         syncGlobeRowHeight();
+
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
