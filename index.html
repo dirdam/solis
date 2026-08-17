@@ -252,8 +252,62 @@
         margin-bottom: 24px;
     }
 
-    .slider-group + .slider-group {
-        margin-top: 26px;
+    .slider-row {
+        display: grid;
+        grid-template-columns: auto 1fr 1fr;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .play-pause-btn {
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* Drawn with CSS rather than Unicode glyphs (&#9208;/&#9654;) so play and pause
+       render at the same visual size — the glyphs themselves are inconsistent
+       weights in most fonts (thin bars vs. a solid triangle). */
+    .play-pause-btn .icon-play {
+        width: 0;
+        height: 0;
+        border-top: 9px solid transparent;
+        border-bottom: 9px solid transparent;
+        border-left: 15px solid currentColor;
+        margin-left: 4px;
+    }
+
+    .play-pause-btn .icon-pause {
+        display: flex;
+        gap: 5px;
+    }
+
+    .play-pause-btn .icon-pause span {
+        width: 6px;
+        height: 20px;
+        background: currentColor;
+        border-radius: 1px;
+    }
+
+    @media screen and (max-width: 700px) {
+        .slider-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .play-pause-btn {
+            justify-self: start;
+            margin-bottom: 20px;
+        }
+
+        .slider-group + .slider-group {
+            margin-top: 26px;
+        }
     }
 
     .control-panel label {
@@ -401,7 +455,7 @@
                     </div>
                 </div>
                 <div class="view-caption">
-                    Drag the globe to look around &middot; night side dark &middot; <span class="highlight" id="captionMonthGlobe">June</span>, <span class="highlight" id="captionHourGlobe">12:00</span> UTC
+                    Drag the globe to look around &middot; night side dark &middot; <span class="highlight" id="captionMonthGlobe">June</span>, <span class="highlight" id="captionHourGlobe">00:00</span> UTC
                 </div>
             </div>
         </div>
@@ -415,7 +469,7 @@
                     <canvas id="earthCanvas" width="760" height="378" aria-label="Earth from Earth's own view, with day and night shaded"></canvas>
                 </div>
                 <div class="view-caption">
-                    Top = Earth's geographical north &middot; spun for <span class="highlight" id="captionHourEarth">12:00</span> UTC
+                    Top = Earth's geographical north &middot; spun for <span class="highlight" id="captionHourEarth">00:00</span> UTC
                 </div>
             </div>
             <div class="view-card">
@@ -426,38 +480,41 @@
                     <canvas id="rotatedCanvas" width="760" height="378" aria-label="Earth from the Sun's view"></canvas>
                 </div>
                 <div class="view-caption">
-                    Rotated for <span class="highlight" id="captionHour">12:00</span> UTC
+                    Rotated for <span class="highlight" id="captionHour">00:00</span> UTC
                 </div>
             </div>
         </div>
 
         <div class="control-panel">
-            <div class="slider-group">
-                <label>
-                    <span>Month of the year</span>
-                    <span id="monthValue">June</span>
-                </label>
-                <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
-                <div class="scale-labels">
-                    <span>Jan</span>
-                    <span>Apr</span>
-                    <span>Jul</span>
-                    <span>Oct</span>
-                    <span>Dec</span>
+            <div class="slider-row">
+                <button type="button" id="playPauseBtn" class="reset-btn play-pause-btn" aria-label="Pause"><span class="icon-pause"><span></span><span></span></span></button>
+                <div class="slider-group">
+                    <label>
+                        <span>Month of the year</span>
+                        <span id="monthValue">June</span>
+                    </label>
+                    <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
+                    <div class="scale-labels">
+                        <span>Jan</span>
+                        <span>Apr</span>
+                        <span>Jul</span>
+                        <span>Oct</span>
+                        <span>Dec</span>
+                    </div>
                 </div>
-            </div>
-            <div class="slider-group">
-                <label>
-                    <span>Hour of the day (UTC)</span>
-                    <span id="hourValue">12:00</span>
-                </label>
-                <input type="range" id="hourSlider" min="0" max="24" step="1" value="12">
-                <div class="scale-labels">
-                    <span>00:00</span>
-                    <span>06:00</span>
-                    <span>12:00</span>
-                    <span>18:00</span>
-                    <span>24:00</span>
+                <div class="slider-group">
+                    <label>
+                        <span>Hour of the day (UTC)</span>
+                        <span id="hourValue">00:00</span>
+                    </label>
+                    <input type="range" id="hourSlider" min="0" max="24" step="1" value="0">
+                    <div class="scale-labels">
+                        <span>00:00</span>
+                        <span>06:00</span>
+                        <span>12:00</span>
+                        <span>18:00</span>
+                        <span>24:00</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -528,7 +585,8 @@
         }
 
         function formatHour(hour) {
-            return `${String(hour % 24).padStart(2, '0')}:00`;
+            const h = Math.floor(hour) % 24;
+            return `${String(h).padStart(2, '0')}:00`;
         }
 
         // --- Shared texture, loaded once and shared by all three views ---------
@@ -639,13 +697,25 @@
             };
         }
 
+        // Shared Sun icon (glow + solid disc), same style used by both flat maps.
+        function drawSunGlyph(ctx, x, y, r) {
+            ctx.fillStyle = 'rgba(255, 200, 80, 0.35)';
+            ctx.beginPath();
+            ctx.arc(x, y, r * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 176, 59, 1)';
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
         // Sun's-eye view: soft-edged circle marks the visible (sunlit) disc versus
         // the dimmed far side — a radial gradient gives the same soft terminator
-        // look the day/night overlay uses, without needing a blur filter. This has
-        // no separate Sun icon or day/night shading, so the month's effect here is
-        // entirely on the Earth's own representation: the tilt applied before
-        // reprojecting varies with the season, from a full ~23.4° lean at the
-        // solstices down to no tilt at all at the equinoxes.
+        // look the day/night overlay uses, without needing a blur filter. The month's
+        // effect here is on the Earth's own representation (the tilt applied before
+        // reprojecting), not a moving Sun icon: since this view is always centered on
+        // whichever meridian currently faces the Sun, the Sun itself is always drawn
+        // dead center rather than computed from hour/declination like the Earth view.
         function drawSunViewOverlay(ctx, width, height) {
             const cx = width / 2, cy = height / 2;
             const r = Math.min(width, height) / 2;
@@ -654,6 +724,8 @@
             grad.addColorStop(1, 'rgba(6, 21, 88, 0.745)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, width, height);
+
+            drawSunGlyph(ctx, cx, cy, height * 0.045);
         }
 
         const sunView = makeFlatView({
@@ -702,15 +774,7 @@
         function drawSunMarker(ctx, width, height, declinationDeg) {
             const sunX = width / 2;
             const sunY = ((90 - declinationDeg) / 180) * height;
-            const r = height * 0.045;
-            ctx.fillStyle = 'rgba(255, 200, 80, 0.35)';
-            ctx.beginPath();
-            ctx.arc(sunX, sunY, r * 2.2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255, 176, 59, 1)';
-            ctx.beginPath();
-            ctx.arc(sunX, sunY, r, 0, Math.PI * 2);
-            ctx.fill();
+            drawSunGlyph(ctx, sunX, sunY, height * 0.045);
         }
 
         // Earth's-own view: never tilted (always Earth's own north-up frame) — only
@@ -762,7 +826,11 @@
         // lean rather than being foreshortened by a bird's-eye viewing angle.
         const globe = (() => {
             const AMBIENT = 0.14;
-            const DEFAULT_AZIMUTH = 0; // azimuth 0 + hour 12 (the page's defaults) faces Greenwich
+            // The currently-sunlit meridian always maps to world (1,0,0) regardless of
+            // hour (that's the same invariant the flat maps rely on to always show the
+            // subsolar meridian centered) — so azimuth 0 always faces the sunny side,
+            // for every hour and month, not just at one specific moment.
+            const DEFAULT_AZIMUTH = 0;
 
             const canvas = document.getElementById('globeCanvas');
             const ctx = canvas.getContext('2d');
@@ -1046,8 +1114,8 @@
             drawMiniEarth(ctx, current.x, current.y, Math.min(W, H) * 0.075, true);
         }
 
-        monthSlider.addEventListener('input', () => {
-            const month = Number(monthSlider.value);
+        function applyMonth(month) {
+            monthSlider.value = month;
             monthValue.textContent = formatMonth(month);
             captionMonthGlobe.textContent = formatMonth(month);
 
@@ -1055,10 +1123,10 @@
             sunView.setMonth(month);
             earthView.setMonth(month);
             globe.setMonth(month);
-        });
+        }
 
-        slider.addEventListener('input', () => {
-            const hour = Number(slider.value);
+        function applyHour(hour) {
+            slider.value = hour;
             const label = formatHour(hour);
             hourValue.textContent = label;
             captionHour.textContent = label;
@@ -1068,9 +1136,75 @@
             sunView.setHour(hour);
             earthView.setHour(hour);
             globe.setHour(hour);
+        }
+
+        monthSlider.addEventListener('input', () => {
+            pauseAutoplay();
+            applyMonth(Number(monthSlider.value));
         });
 
-        drawOrbitDiagram(Number(monthSlider.value));
+        slider.addEventListener('input', () => {
+            pauseAutoplay();
+            applyHour(Number(slider.value));
+        });
+
+        // --- Autoplay: the hour slider sweeps 0->24 every 10 seconds; each time it
+        // wraps back to 0, the month advances by one (looping from December back to
+        // January). Manually dragging either slider pauses it; the play/pause button
+        // toggles it — resuming picks up from wherever the playhead was left.
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        let autoplay = true;
+        let playhead = { month: 6, hour: 0 };
+        let lastFrameTime = null;
+        const HOUR_CYCLE_MS = 10000;
+
+        function updatePlayPauseButton() {
+            playPauseBtn.innerHTML = autoplay
+                ? '<span class="icon-pause"><span></span><span></span></span>'
+                : '<span class="icon-play"></span>';
+            playPauseBtn.setAttribute('aria-label', autoplay ? 'Pause' : 'Play');
+        }
+
+        function pauseAutoplay() {
+            if (!autoplay) return;
+            autoplay = false;
+            updatePlayPauseButton();
+        }
+
+        function resumeAutoplay() {
+            if (autoplay) return;
+            autoplay = true;
+            lastFrameTime = null; // don't apply a delta spanning the paused time
+            updatePlayPauseButton();
+            requestAnimationFrame(autoplayTick);
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (autoplay) pauseAutoplay(); else resumeAutoplay();
+        });
+
+        function autoplayTick(timestamp) {
+            if (!autoplay) return;
+            if (lastFrameTime === null) lastFrameTime = timestamp;
+            // Clamp the frame delta so a throttled/backgrounded tab regaining focus
+            // can't cause a multi-lap jump — at most one wrap per tick either way.
+            const dt = Math.min(timestamp - lastFrameTime, 100);
+            lastFrameTime = timestamp;
+
+            playhead.hour += (dt / HOUR_CYCLE_MS) * 24;
+            if (playhead.hour >= 24) {
+                playhead.hour -= 24;
+                playhead.month = playhead.month >= 12 ? 1 : playhead.month + 1;
+                applyMonth(playhead.month);
+            }
+            applyHour(playhead.hour);
+
+            requestAnimationFrame(autoplayTick);
+        }
+
+        applyMonth(playhead.month);
+        applyHour(playhead.hour);
+        requestAnimationFrame(autoplayTick);
         loadTexture();
     </script>
 </body>
