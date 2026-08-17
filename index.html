@@ -396,11 +396,17 @@
     }
 
     .scale-labels {
-        display: flex;
-        justify-content: space-between;
+        position: relative;
+        height: 1.4em;
         font-size: 0.75em;
         color: var(--text-dim);
         margin-top: 8px;
+    }
+
+    .scale-labels span {
+        position: absolute;
+        top: 0;
+        white-space: nowrap;
     }
 
     .how-it-works ul {
@@ -503,13 +509,7 @@
                         <input type="range" id="monthSlider" min="1" max="12" step="1" value="6">
                         <div class="slider-ticks" id="monthTicks"></div>
                     </div>
-                    <div class="scale-labels">
-                        <span>Jan</span>
-                        <span>Apr</span>
-                        <span>Jul</span>
-                        <span>Oct</span>
-                        <span>Dec</span>
-                    </div>
+                    <div class="scale-labels" id="monthScaleLabels"></div>
                 </div>
                 <div class="slider-group">
                     <label>
@@ -520,13 +520,7 @@
                         <input type="range" id="hourSlider" min="0" max="24" step="1" value="0">
                         <div class="slider-ticks" id="hourTicks"></div>
                     </div>
-                    <div class="scale-labels">
-                        <span>00:00</span>
-                        <span>06:00</span>
-                        <span>12:00</span>
-                        <span>18:00</span>
-                        <span>24:00</span>
-                    </div>
+                    <div class="scale-labels" id="hourScaleLabels"></div>
                 </div>
             </div>
         </div>
@@ -1093,17 +1087,54 @@
 
         // Tick dots, one per selectable value, spaced with simple linear percentages
         // so they land exactly evenly and line up with where the slider thumb stops.
+        const SLIDER_THUMB_PX = 22; // must match input[type=range]::-webkit-slider-thumb width
+
         function renderTicks(containerId, count) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
+            const half = SLIDER_THUMB_PX / 2;
             for (let i = 0; i < count; i++) {
                 const tick = document.createElement('span');
-                tick.style.left = `${(i / (count - 1)) * 100}%`;
+                const fraction = i / (count - 1);
+                // The thumb's center travels from half-thumb-width in from the left
+                // edge to half-thumb-width in from the right edge — never the full
+                // 0%-100% of the track — so ticks need the same inset to land where
+                // the thumb actually stops instead of drifting off by up to half a
+                // thumb-width at the ends (exact at the midpoint, worst at the edges).
+                tick.style.left = `calc(${half}px + (100% - ${SLIDER_THUMB_PX}px) * ${fraction})`;
                 container.appendChild(tick);
             }
         }
         renderTicks('monthTicks', 12);
         renderTicks('hourTicks', 25);
+
+        // Scale-label text, positioned with the same thumb-inset math as the ticks
+        // so the labels actually line up with where the slider stops, rather than
+        // assuming the labelled values sit at the track's true 0%/100% edges.
+        function renderScaleLabels(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const half = SLIDER_THUMB_PX / 2;
+            items.forEach(({ fraction, text }) => {
+                const span = document.createElement('span');
+                span.textContent = text;
+                span.style.left = `calc(${half}px + (100% - ${SLIDER_THUMB_PX}px) * ${fraction})`;
+                span.style.transform = fraction <= 0.001 ? 'translateX(0)'
+                    : fraction >= 0.999 ? 'translateX(-100%)'
+                    : 'translateX(-50%)';
+                container.appendChild(span);
+            });
+        }
+
+        renderScaleLabels('hourScaleLabels', [0, 6, 12, 18, 24].map((h) => ({
+            fraction: h / 24,
+            text: `${String(h).padStart(2, '0')}:00`, // not formatHour(h): that wraps 24 to "00:00"
+        })));
+        // Only the solstice/equinox months, matching the orbit diagram's labels.
+        renderScaleLabels('monthScaleLabels', [3, 6, 9, 12].map((m) => ({
+            fraction: (m - 1) / 11,
+            text: formatMonth(m).slice(0, 3),
+        })));
 
         // --- Orbit diagram: Earth's position around the Sun for the selected month.
         // Purely 2D/decorative — orbital position depends only on month (the hour of
