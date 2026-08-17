@@ -90,8 +90,13 @@ def rotate_equirectangular(image_path, x_angle=0, y_angle=0, z_angle=0):
     # Stack coordinates for matrix multiplication
     coords = np.stack([x, y, z], axis=-1)
     
-    # Create combined rotation matrix
-    R = rotation_matrix_z(z_angle) @ rotation_matrix_y(y_angle) @ rotation_matrix_x(x_angle)
+    # Create combined rotation matrix. Spin (z) is applied first, in the body's own frame —
+    # this is Earth turning on its real, already-tilted axis. The axial tilt (x) is applied
+    # last, mapping that spinning body into the fixed Sun-facing viewing frame. Applying tilt
+    # before spin (the reverse order) makes the tilt itself precess around the viewing axis
+    # every rotation, which looks like the viewpoint swinging around Earth instead of Earth
+    # spinning in place.
+    R = rotation_matrix_x(x_angle) @ rotation_matrix_y(y_angle) @ rotation_matrix_z(z_angle)
     
     # Apply inverse rotation (we rotate backwards to find source pixels)
     R_inv = R.T

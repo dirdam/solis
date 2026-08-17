@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
+<title>Ex parte Solis</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --accent: #ffb347;
+        --accent-2: #ff6b6b;
+        --panel-bg: rgba(255, 255, 255, 0.06);
+        --panel-border: rgba(255, 255, 255, 0.12);
+        --text-main: #f1f3f8;
+        --text-dim: #aeb4c7;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        color: var(--text-main);
+        min-height: 100vh;
+        padding: 32px 20px 60px;
+        background:
+            radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+            radial-gradient(1px 1px at 80% 10%, #fff, transparent),
+            radial-gradient(1.5px 1.5px at 60% 70%, #fff, transparent),
+            radial-gradient(1px 1px at 30% 85%, #fff, transparent),
+            radial-gradient(1px 1px at 90% 60%, #fff, transparent),
+            radial-gradient(1.5px 1.5px at 45% 40%, #fff, transparent),
+            radial-gradient(1px 1px at 15% 55%, #fff, transparent),
+            linear-gradient(160deg, #05061a 0%, #0b0f2e 45%, #1a1140 100%);
+        background-attachment: fixed;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+
+    header h1 {
+        font-size: 2.4em;
+        font-weight: 800;
+        background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: 0.5px;
+    }
+
+    header p {
+        color: var(--text-dim);
+        margin-top: 8px;
+        font-size: 1.05em;
+    }
+
+    .panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        backdrop-filter: blur(14px);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        margin-bottom: 24px;
+    }
+
+    .panel h2 {
+        font-size: 1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .panel p {
+        color: var(--text-dim);
+        line-height: 1.6;
+        font-size: 0.95em;
+    }
+
+    .panel p strong {
+        color: var(--text-main);
+    }
+
+    .views {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .view-card {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        backdrop-filter: blur(14px);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .view-card h3 {
+        font-size: 0.95em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-bottom: 12px;
+        font-weight: 700;
+    }
+
+    .image-frame {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        aspect-ratio: 2058 / 1036;
+        background: #000;
+    }
+
+    .image-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: opacity 0.15s ease;
+    }
+
+    .image-frame img.loading {
+        opacity: 0.45;
+    }
+
+    .view-caption {
+        margin-top: 12px;
+        font-size: 0.85em;
+        color: var(--text-dim);
+        text-align: center;
+    }
+
+    .view-caption .highlight {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .control-panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        backdrop-filter: blur(14px);
+        border-radius: 16px;
+        padding: 26px 28px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        margin-bottom: 24px;
+    }
+
+    .control-panel label {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .control-panel label span:first-child {
+        color: var(--text-dim);
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    #hourValue {
+        font-size: 1.4em;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: linear-gradient(to right, #1a1140, var(--accent) 50%, var(--accent-2));
+        outline: none;
+        cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid var(--accent);
+        box-shadow: 0 2px 10px rgba(255, 179, 71, 0.6);
+        cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid var(--accent);
+        box-shadow: 0 2px 10px rgba(255, 179, 71, 0.6);
+        cursor: pointer;
+    }
+
+    .scale-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75em;
+        color: var(--text-dim);
+        margin-top: 8px;
+    }
+
+    .how-it-works ul {
+        list-style: none;
+        margin-top: 12px;
+        display: grid;
+        gap: 8px;
+    }
+
+    .how-it-works li {
+        color: var(--text-dim);
+        font-size: 0.9em;
+        line-height: 1.5;
+        padding-left: 18px;
+        position: relative;
+    }
+
+    .how-it-works li::before {
+        content: "\2022";
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+    }
+
+    .how-it-works li strong {
+        color: var(--text-main);
+    }
+
+    @media screen and (max-width: 768px) {
+        .views {
+            grid-template-columns: 1fr;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+        }
+
+        .control-panel {
+            padding: 20px;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☀️ Ex parte Solis</h1>
+            <p>Earth from the Sun's point of view</p>
+        </header>
+
+        <div class="panel">
+            <h2>Earth's own reference frame</h2>
+            <p>
+                Earth is always shown here from <strong>Earth's own reference frame</strong>: the map is oriented
+                so that Earth's geographical north pole points to the top, exactly as in a standard world map.
+            </p>
+        </div>
+
+        <div class="panel">
+            <h2>The Sun's reference frame</h2>
+            <p>
+                This project instead asks what a map of Earth would look like from the <strong>Sun's</strong>
+                reference frame. Picture "solino" citizens living on the Sun: to draw a map, they would orient it
+                using the Sun's own geographical north and the plane of the solar system, not Earth's geographical
+                north. Because Earth's rotation axis is tilted relative to that plane, the resulting projection is
+                rotated compared to the familiar Earth-centered map. Use the slider below to explore how the map
+                changes as Earth spins through the hours of the day.
+            </p>
+        </div>
+
+        <div class="views">
+            <div class="view-card">
+                <h3>Original Earth view</h3>
+                <div class="image-frame">
+                    <img id="earthImage" src="/api/earth/12" alt="Earth from Earth's view">
+                </div>
+                <div class="view-caption">
+                    Top = Earth's geographical north &middot; spun for <span class="highlight" id="captionHourEarth">12:00</span> UTC
+                </div>
+            </div>
+            <div class="view-card">
+                <h3>Sun's-eye view</h3>
+                <div class="image-frame">
+                    <img id="rotatedImage" src="/api/rotate/12" alt="Earth from the Sun's view">
+                </div>
+                <div class="view-caption">
+                    Rotated for <span class="highlight" id="captionHour">12:00</span> UTC
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <label>
+                <span>Hour of the day (UTC)</span>
+                <span id="hourValue">12:00</span>
+            </label>
+            <input type="range" id="hourSlider" min="0" max="24" step="1" value="12">
+            <div class="scale-labels">
+                <span>00:00</span>
+                <span>06:00</span>
+                <span>12:00</span>
+                <span>18:00</span>
+                <span>24:00</span>
+            </div>
+        </div>
+
+        <div class="panel how-it-works">
+            <h2>How it works</h2>
+            <p>This app renders Earth from the Sun's perspective at a given hour of the day by:</p>
+            <ul>
+                <li>Mapping the equirectangular projection onto a 3D sphere</li>
+                <li>Tilting it by Earth's fixed axial tilt (~23.5°) relative to the solar system's plane</li>
+                <li>Spinning it around its polar axis to match the selected hour of the day</li>
+                <li>Reprojecting back to an equirectangular view</li>
+            </ul>
+            <ul style="margin-top: 16px;">
+                <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt relative to the orbital plane</li>
+                <li><strong>Hour of the day</strong>: spins the Earth so the meridian facing the Sun matches the selected time</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const slider = document.getElementById('hourSlider');
+        const hourValue = document.getElementById('hourValue');
+        const captionHour = document.getElementById('captionHour');
+        const captionHourEarth = document.getElementById('captionHourEarth');
+        const rotatedImage = document.getElementById('rotatedImage');
+        const earthImage = document.getElementById('earthImage');
+
+        let debounceTimer = null;
+
+        function formatHour(hour) {
+            return `${String(hour % 24).padStart(2, '0')}:00`;
+        }
+
+        function swapImage(imgEl, src) {
+            imgEl.classList.add('loading');
+            const img = new Image();
+            img.onload = () => {
+                imgEl.src = img.src;
+                imgEl.classList.remove('loading');
+            };
+            img.src = src;
+        }
+
+        function updateImages(hour) {
+            swapImage(rotatedImage, `/api/rotate/${hour}`);
+            swapImage(earthImage, `/api/earth/${hour}`);
+        }
+
+        slider.addEventListener('input', () => {
+            const hour = Number(slider.value);
+            const label = formatHour(hour);
+            hourValue.textContent = label;
+            captionHour.textContent = label;
+            captionHourEarth.textContent = label;
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => updateImages(hour), 60);
+        });
+    </script>
+</body>
+</html>
