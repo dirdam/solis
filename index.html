@@ -95,7 +95,7 @@
 
     .views {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 24px;
         margin-bottom: 24px;
     }
@@ -111,33 +111,66 @@
         flex-direction: column;
     }
 
+    .view-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
     .view-card h3 {
         font-size: 0.95em;
         text-transform: uppercase;
         letter-spacing: 1px;
         color: var(--text-dim);
-        margin-bottom: 12px;
         font-weight: 700;
+    }
+
+    .reset-btn {
+        background: rgba(255, 179, 71, 0.12);
+        border: 1px solid rgba(255, 179, 71, 0.4);
+        color: var(--accent);
+        font-size: 0.72em;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        box-shadow: none;
+    }
+
+    .reset-btn:hover {
+        background: rgba(255, 179, 71, 0.22);
+        transform: none;
+        box-shadow: none;
     }
 
     .image-frame {
         position: relative;
         border-radius: 10px;
         overflow: hidden;
-        aspect-ratio: 2058 / 1036;
+        aspect-ratio: 760 / 378;
         background: #000;
     }
 
-    .image-frame img {
+    .image-frame canvas {
         width: 100%;
         height: 100%;
-        object-fit: cover;
         display: block;
-        transition: opacity 0.15s ease;
     }
 
-    .image-frame img.loading {
-        opacity: 0.45;
+    .image-frame.globe-frame {
+        aspect-ratio: 520 / 430;
+        background: transparent;
+    }
+
+    .image-frame.globe-frame canvas {
+        cursor: grab;
+        touch-action: none;
+    }
+
+    .image-frame.globe-frame canvas:active {
+        cursor: grabbing;
     }
 
     .view-caption {
@@ -248,6 +281,12 @@
         color: var(--text-main);
     }
 
+    @media screen and (max-width: 1000px) {
+        .views {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
     @media screen and (max-width: 768px) {
         .views {
             grid-template-columns: 1fr;
@@ -292,21 +331,37 @@
 
         <div class="views">
             <div class="view-card">
-                <h3>Original Earth view</h3>
+                <div class="view-card-header">
+                    <h3>Original Earth view</h3>
+                </div>
                 <div class="image-frame">
-                    <img id="earthImage" src="/api/earth/12" alt="Earth from Earth's view">
+                    <canvas id="earthCanvas" width="760" height="378" aria-label="Earth from Earth's own view, with day and night shaded"></canvas>
                 </div>
                 <div class="view-caption">
                     Top = Earth's geographical north &middot; spun for <span class="highlight" id="captionHourEarth">12:00</span> UTC
                 </div>
             </div>
             <div class="view-card">
-                <h3>Sun's-eye view</h3>
+                <div class="view-card-header">
+                    <h3>Sun's-eye view</h3>
+                </div>
                 <div class="image-frame">
-                    <img id="rotatedImage" src="/api/rotate/12" alt="Earth from the Sun's view">
+                    <canvas id="rotatedCanvas" width="760" height="378" aria-label="Earth from the Sun's view"></canvas>
                 </div>
                 <div class="view-caption">
                     Rotated for <span class="highlight" id="captionHour">12:00</span> UTC
+                </div>
+            </div>
+            <div class="view-card">
+                <div class="view-card-header">
+                    <h3>3D view</h3>
+                    <button type="button" id="resetGlobeBtn" class="reset-btn">Reset view</button>
+                </div>
+                <div class="image-frame globe-frame">
+                    <canvas id="globeCanvas" width="520" height="430" aria-label="Draggable 3D globe showing Earth's axial tilt, with the night side dark"></canvas>
+                </div>
+                <div class="view-caption">
+                    Drag to look around &middot; night side dark &middot; <span class="highlight" id="captionHourGlobe">12:00</span> UTC
                 </div>
             </div>
         </div>
@@ -338,38 +393,395 @@
             <ul style="margin-top: 16px;">
                 <li><strong>Axial tilt</strong>: fixed at Earth's real ~23.5° tilt relative to the orbital plane</li>
                 <li><strong>Hour of the day</strong>: spins the Earth so the meridian facing the Sun matches the selected time</li>
+                <li><strong>3D view</strong>: the same tilt and lighting rendered as an actual sphere you can drag to look around — the camera stays level with the orbital plane, so the axial tilt always reads as a lean rather than a bird's-eye view</li>
             </ul>
         </div>
     </div>
 
     <script>
-        const slider = document.getElementById('hourSlider');
-        const hourValue = document.getElementById('hourValue');
-        const captionHour = document.getElementById('captionHour');
-        const captionHourEarth = document.getElementById('captionHourEarth');
-        const rotatedImage = document.getElementById('rotatedImage');
-        const earthImage = document.getElementById('earthImage');
+        // --- Shared math (mirrors the app's Python rotation model exactly) ------
+        const AXIAL_TILT_DEG = 24;
+        const DECLINATION_DEG = 23.4; // no calendar input; fixed solstice-like terminator curve
 
-        let debounceTimer = null;
+        function deg2rad(d) { return (d * Math.PI) / 180; }
+
+        function rotationMatrixX(deg) {
+            const a = deg2rad(deg), c = Math.cos(a), s = Math.sin(a);
+            return [[1, 0, 0], [0, c, -s], [0, s, c]];
+        }
+        function rotationMatrixZ(deg) {
+            const a = deg2rad(deg), c = Math.cos(a), s = Math.sin(a);
+            return [[c, -s, 0], [s, c, 0], [0, 0, 1]];
+        }
+        function matMul(a, b) {
+            const out = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++)
+                for (let j = 0; j < 3; j++)
+                    out[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
+            return out;
+        }
+        function matVec(m, v) {
+            return [
+                m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+                m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+                m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
+            ];
+        }
+        function transpose(m) {
+            return [[m[0][0], m[1][0], m[2][0]], [m[0][1], m[1][1], m[2][1]], [m[0][2], m[1][2], m[2][2]]];
+        }
+        function hourToZAngle(hour) {
+            return (((12 - hour) * 15) % 360 + 360) % 360;
+        }
 
         function formatHour(hour) {
             return `${String(hour % 24).padStart(2, '0')}:00`;
         }
 
-        function swapImage(imgEl, src) {
-            imgEl.classList.add('loading');
+        // --- Shared texture, loaded once and shared by all three views ---------
+        let texData = null, texW = 0, texH = 0;
+        const onTextureReady = [];
+
+        function loadTexture() {
             const img = new Image();
             img.onload = () => {
-                imgEl.src = img.src;
-                imgEl.classList.remove('loading');
+                const off = document.createElement('canvas');
+                off.width = img.width;
+                off.height = img.height;
+                const octx = off.getContext('2d');
+                octx.drawImage(img, 0, 0);
+                texData = octx.getImageData(0, 0, img.width, img.height).data;
+                texW = img.width;
+                texH = img.height;
+                onTextureReady.forEach((fn) => fn());
             };
-            img.src = src;
+            img.src = '/api/texture.png';
         }
 
-        function updateImages(hour) {
-            swapImage(rotatedImage, `/api/rotate/${hour}`);
-            swapImage(earthImage, `/api/earth/${hour}`);
+        // --- Flat equirectangular views (Earth's-own-view and Sun's-eye view) --
+        // Both are the same reprojection algorithm the app always used, just run
+        // client-side now: a fixed axial tilt plus an hour-dependent spin, resampled
+        // into the same equirectangular grid. Rendering locally means the hour
+        // slider redraws instantly with no network round-trip (and nothing to
+        // accidentally cache stale, which is what caused the earlier blur bug).
+        function makeFlatView({ canvasId, xAngleDeg, prePixel, postCanvas }) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Per-pixel unit-sphere coordinates for the OUTPUT grid — fixed layout,
+            // independent of hour, so this is computed once up front.
+            const vx = new Float32Array(width * height);
+            const vy = new Float32Array(width * height);
+            const vz = new Float32Array(width * height);
+            for (let y = 0; y < height; y++) {
+                const lat = Math.PI / 2 - (y / (height - 1)) * Math.PI;
+                const cosLat = Math.cos(lat), sinLat = Math.sin(lat);
+                for (let x = 0; x < width; x++) {
+                    const lon = -Math.PI + (x / (width - 1)) * (2 * Math.PI);
+                    const i = y * width + x;
+                    vx[i] = cosLat * Math.cos(lon);
+                    vy[i] = cosLat * Math.sin(lon);
+                    vz[i] = sinLat;
+                }
+            }
+
+            let hour = 12;
+
+            function render() {
+                if (!texData) return;
+                const zAngle = hourToZAngle(hour);
+                const R = matMul(rotationMatrixX(xAngleDeg), rotationMatrixZ(zAngle));
+                const Rt = transpose(R);
+
+                const frame = ctx.createImageData(width, height);
+                const out = frame.data;
+
+                for (let i = 0; i < width * height; i++) {
+                    const x = vx[i], y = vy[i], z = vz[i];
+                    const sx = Rt[0][0] * x + Rt[0][1] * y + Rt[0][2] * z;
+                    const sy = Rt[1][0] * x + Rt[1][1] * y + Rt[1][2] * z;
+                    const sz = Rt[2][0] * x + Rt[2][1] * y + Rt[2][2] * z;
+
+                    const lon = Math.atan2(sy, sx);
+                    const lat = Math.asin(Math.max(-1, Math.min(1, sz)));
+
+                    let tx = Math.floor(((lon + Math.PI) / (2 * Math.PI)) * texW) % texW;
+                    if (tx < 0) tx += texW;
+                    let ty = Math.floor(((Math.PI / 2 - lat) / Math.PI) * texH);
+                    if (ty < 0) ty = 0; else if (ty >= texH) ty = texH - 1;
+
+                    const ti = (ty * texW + tx) * 4;
+                    const oi = i * 4;
+                    out[oi] = texData[ti];
+                    out[oi + 1] = texData[ti + 1];
+                    out[oi + 2] = texData[ti + 2];
+                    out[oi + 3] = 255;
+                }
+
+                if (prePixel) prePixel(out, width, height);
+                ctx.putImageData(frame, 0, 0);
+                if (postCanvas) postCanvas(ctx, width, height);
+            }
+
+            onTextureReady.push(render);
+
+            return {
+                setHour(h) { hour = h; render(); },
+            };
         }
+
+        // Sun's-eye view: soft-edged circle marks the visible (sunlit) disc versus
+        // the dimmed far side — a radial gradient gives the same soft terminator
+        // look the day/night overlay uses, without needing a blur filter.
+        function drawSunViewOverlay(ctx, width, height) {
+            const cx = width / 2, cy = height / 2;
+            const r = Math.min(width, height) / 2;
+            const grad = ctx.createRadialGradient(cx, cy, r * 0.88, cx, cy, r * 1.12);
+            grad.addColorStop(0, 'rgba(6, 21, 88, 0)');
+            grad.addColorStop(1, 'rgba(6, 21, 88, 0.745)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        // Earth's-own view: night-side shading, precomputed once since (like the
+        // rotation itself) the current subsolar meridian is always centered here,
+        // so the terminator's position in display coordinates never depends on hour.
+        function makeNightAlpha(width, height) {
+            const alpha = new Float32Array(width * height);
+            const decRad = deg2rad(DECLINATION_DEG);
+            const sinDec = Math.sin(decRad), cosDec = Math.cos(decRad);
+            const band = 8.0;
+            const maxAlpha = 190 / 255;
+            for (let y = 0; y < height; y++) {
+                const latDeg = 90 - (y / (height - 1)) * 180;
+                const latRad = deg2rad(latDeg);
+                const sinLat = Math.sin(latRad), cosLat = Math.cos(latRad);
+                for (let x = 0; x < width; x++) {
+                    const lonDeg = -180 + (x / (width - 1)) * 360;
+                    const sinElevation = sinDec * sinLat + cosDec * cosLat * Math.cos(deg2rad(lonDeg));
+                    const elevationDeg = Math.asin(Math.max(-1, Math.min(1, sinElevation))) * 180 / Math.PI;
+                    const nightAlpha = Math.max(0, Math.min(1, 0.5 - elevationDeg / band));
+                    alpha[y * width + x] = nightAlpha * maxAlpha;
+                }
+            }
+            return alpha;
+        }
+
+        const earthCanvasEl = document.getElementById('earthCanvas');
+        const earthNightAlpha = makeNightAlpha(earthCanvasEl.width, earthCanvasEl.height);
+
+        function applyNightShade(out, width, height) {
+            for (let i = 0; i < width * height; i++) {
+                const a = earthNightAlpha[i];
+                if (a === 0) continue;
+                const oi = i * 4;
+                out[oi] = out[oi] * (1 - a) + 6 * a;
+                out[oi + 1] = out[oi + 1] * (1 - a) + 21 * a;
+                out[oi + 2] = out[oi + 2] * (1 - a) + 88 * a;
+            }
+        }
+
+        function drawSunMarker(ctx, width, height) {
+            const sunX = width / 2;
+            const sunY = ((90 - DECLINATION_DEG) / 180) * height;
+            const r = height * 0.045;
+            ctx.fillStyle = 'rgba(255, 200, 80, 0.35)';
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, r * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 176, 59, 1)';
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        const sunView = makeFlatView({
+            canvasId: 'rotatedCanvas',
+            xAngleDeg: -AXIAL_TILT_DEG,
+            postCanvas: drawSunViewOverlay,
+        });
+        const earthView = makeFlatView({
+            canvasId: 'earthCanvas',
+            xAngleDeg: 0,
+            prePixel: applyNightShade,
+            postCanvas: drawSunMarker,
+        });
+
+        // --- Draggable 3D globe -------------------------------------------------
+        // Uses the same rotation math as the flat maps above, so the lit/dark side
+        // always matches the sunlit meridian shown there. The camera can only orbit
+        // in azimuth (drag left/right) — elevation is fixed at 0, i.e. the camera
+        // always stays level with the orbital plane, so the axial tilt reads as a
+        // lean rather than being foreshortened by a bird's-eye viewing angle.
+        const globe = (() => {
+            const AMBIENT = 0.14;
+            const DEFAULT_AZIMUTH = 0; // azimuth 0 + hour 12 (the page's defaults) faces Greenwich
+
+            const canvas = document.getElementById('globeCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            const cx = W * 0.5;
+            const cy = H * 0.52;
+            const radius = H * 0.42;
+
+            // Camera basis for a given azimuth, elevation always 0 (in the orbital plane).
+            function cameraBasis(azimuthDeg) {
+                const az = deg2rad(azimuthDeg);
+                const towardViewer = [Math.cos(az), Math.sin(az), 0];
+                const worldUp = [0, 0, 1];
+                // right = worldUp x towardViewer
+                let right = [
+                    worldUp[1] * towardViewer[2] - worldUp[2] * towardViewer[1],
+                    worldUp[2] * towardViewer[0] - worldUp[0] * towardViewer[2],
+                    worldUp[0] * towardViewer[1] - worldUp[1] * towardViewer[0],
+                ];
+                const rlen = Math.hypot(right[0], right[1], right[2]);
+                right = [right[0] / rlen, right[1] / rlen, right[2] / rlen];
+                // up = towardViewer x right
+                const up = [
+                    towardViewer[1] * right[2] - towardViewer[2] * right[1],
+                    towardViewer[2] * right[0] - towardViewer[0] * right[2],
+                    towardViewer[0] * right[1] - towardViewer[1] * right[0],
+                ];
+                return { right, up, towardViewer };
+            }
+
+            // Precompute per-pixel camera-local sphere coordinates once (layout-only,
+            // independent of azimuth/hour) plus the visibility mask.
+            const pixels = [];
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const nx = (x - cx) / radius;
+                    const ny = -(y - cy) / radius;
+                    const r2 = nx * nx + ny * ny;
+                    if (r2 > 1) continue;
+                    const nz = Math.sqrt(Math.max(0, 1 - r2));
+                    pixels.push({ x, y, nx, ny, nz });
+                }
+            }
+
+            let azimuth = DEFAULT_AZIMUTH;
+            let hour = 12;
+            let dragging = false;
+            let dragStartX = 0;
+            let dragStartAzimuth = 0;
+            let needsRender = false;
+
+            function render() {
+                if (!texData) return;
+                const x_angle = -AXIAL_TILT_DEG;
+                const zAngle = hourToZAngle(hour);
+                const Q = matMul(rotationMatrixX(x_angle), rotationMatrixZ(zAngle));
+                const Qt = transpose(Q);
+                const { right, up, towardViewer } = cameraBasis(azimuth);
+
+                // p_body = Q^T . p_world, and p_world = nx*right + ny*up + nz*towardViewer,
+                // so precompute A = Q^T.right, B = Q^T.up, C = Q^T.towardViewer once per
+                // frame; per pixel p_body is just nx*A + ny*B + nz*C.
+                const A = matVec(Qt, right), B = matVec(Qt, up), C = matVec(Qt, towardViewer);
+
+                const frame = ctx.createImageData(W, H);
+                const out = frame.data;
+
+                for (let i = 0; i < pixels.length; i++) {
+                    const { x, y, nx, ny, nz } = pixels[i];
+                    const bx = nx * A[0] + ny * B[0] + nz * C[0];
+                    const by = nx * A[1] + ny * B[1] + nz * C[1];
+                    const bz = nx * A[2] + ny * B[2] + nz * C[2];
+
+                    const lon = Math.atan2(by, bx);
+                    const lat = Math.asin(Math.max(-1, Math.min(1, bz)));
+
+                    let tx = Math.floor(((lon + Math.PI) / (2 * Math.PI)) * texW) % texW;
+                    if (tx < 0) tx += texW;
+                    let ty = Math.floor(((Math.PI / 2 - lat) / Math.PI) * texH);
+                    if (ty < 0) ty = 0; else if (ty >= texH) ty = texH - 1;
+
+                    const ti = (ty * texW + tx) * 4;
+
+                    // brightness = dot(p_world, SUN_DIR); SUN_DIR is world +X, so this is
+                    // just the world-space X component: nx*right.x + ny*up.x + nz*towardViewer.x
+                    const brightness = nx * right[0] + ny * up[0] + nz * towardViewer[0];
+                    const shade = AMBIENT + (1 - AMBIENT) * Math.max(0, brightness);
+
+                    const oi = (y * W + x) * 4;
+                    out[oi] = texData[ti] * shade;
+                    out[oi + 1] = texData[ti + 1] * shade;
+                    out[oi + 2] = texData[ti + 2] * shade;
+                    out[oi + 3] = 255;
+                }
+
+                ctx.clearRect(0, 0, W, H);
+                ctx.putImageData(frame, 0, 0);
+
+                // Rotation axis (fixed in world space; spin doesn't move the pole) drawn
+                // on top, only its tips visible past the opaque globe disc.
+                const northWorld = matVec(rotationMatrixX(x_angle), [0, 0, 1]);
+                const southWorld = [-northWorld[0], -northWorld[1], -northWorld[2]];
+                const project = (p, scale) => [
+                    cx + radius * scale * (p[0] * right[0] + p[1] * right[1] + p[2] * right[2]),
+                    cy - radius * scale * (p[0] * up[0] + p[1] * up[1] + p[2] * up[2]),
+                ];
+                const nTip = project(northWorld, 1.28);
+                const sTip = project(southWorld, 1.28);
+
+                ctx.strokeStyle = 'rgba(230, 230, 240, 0.55)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(nTip[0], nTip[1]);
+                ctx.lineTo(sTip[0], sTip[1]);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(230, 230, 240, 0.85)';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('N', nTip[0], nTip[1] - 6);
+                ctx.fillText('S', sTip[0], sTip[1] + 14);
+            }
+
+            function scheduleRender() {
+                if (needsRender) return;
+                needsRender = true;
+                requestAnimationFrame(() => {
+                    needsRender = false;
+                    render();
+                });
+            }
+
+            canvas.addEventListener('pointerdown', (e) => {
+                dragging = true;
+                dragStartX = e.clientX;
+                dragStartAzimuth = azimuth;
+                canvas.setPointerCapture(e.pointerId);
+            });
+            canvas.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                const deltaX = e.clientX - dragStartX;
+                azimuth = dragStartAzimuth + deltaX * 0.4;
+                scheduleRender();
+            });
+            canvas.addEventListener('pointerup', () => { dragging = false; });
+            canvas.addEventListener('pointercancel', () => { dragging = false; });
+
+            onTextureReady.push(render);
+
+            return {
+                setHour(h) { hour = h; scheduleRender(); },
+                reset() { azimuth = DEFAULT_AZIMUTH; scheduleRender(); },
+            };
+        })();
+
+        document.getElementById('resetGlobeBtn').addEventListener('click', () => globe.reset());
+
+        // --- Hour slider: drives all three views, fully client-side -------------
+        const slider = document.getElementById('hourSlider');
+        const hourValue = document.getElementById('hourValue');
+        const captionHour = document.getElementById('captionHour');
+        const captionHourEarth = document.getElementById('captionHourEarth');
+        const captionHourGlobe = document.getElementById('captionHourGlobe');
 
         slider.addEventListener('input', () => {
             const hour = Number(slider.value);
@@ -377,10 +789,14 @@
             hourValue.textContent = label;
             captionHour.textContent = label;
             captionHourEarth.textContent = label;
+            captionHourGlobe.textContent = label;
 
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => updateImages(hour), 60);
+            sunView.setHour(hour);
+            earthView.setHour(hour);
+            globe.setHour(hour);
         });
+
+        loadTexture();
     </script>
 </body>
 </html>

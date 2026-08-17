@@ -1,4 +1,4 @@
-"""Solis web server: serves the standalone HTML/CSS/JS app and rotated-image API."""
+"""Solis web server: serves the standalone HTML/CSS/JS app and its texture image."""
 
 from flask import Flask, Response, send_from_directory
 
@@ -12,24 +12,11 @@ def index():
     return send_from_directory(".", "index.html")
 
 
-@app.route("/projection.jpg")
-def original_image():
-    return send_from_directory(".", "projection.jpg")
-
-
-@app.route("/api/rotate/<int:hour>")
-def rotate(hour):
-    png_bytes = imaging.get_rotated_png(hour)
+@app.route("/api/texture.png")
+def texture():
+    png_bytes = imaging.get_texture_png()
     response = Response(png_bytes, mimetype="image/png")
-    response.headers["Cache-Control"] = "no-store"
-    return response
-
-
-@app.route("/api/earth/<int:hour>")
-def earth_view(hour):
-    png_bytes = imaging.get_earth_view_png(hour)
-    response = Response(png_bytes, mimetype="image/png")
-    response.headers["Cache-Control"] = "no-store"
+    response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
 
