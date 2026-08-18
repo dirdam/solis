@@ -770,7 +770,15 @@
             img.onerror = () => {
                 console.error('Failed to load texture:', img.src);
             };
-            const dir = window.location.pathname.replace(/[^/]*$/, '');
+            // This route only ever serves index.html at its own mount point (no
+            // deeper static files), so the whole pathname IS the base dir — just
+            // ensure it ends with "/". Stripping the last "/…" segment, as if it
+            // might be a filename, breaks when the URL has no trailing slash
+            // (e.g. a link to "/solis" instead of "/solis/"): that strips "solis"
+            // itself and resolves the texture request against the domain root.
+            const dir = window.location.pathname.endsWith('/')
+                ? window.location.pathname
+                : window.location.pathname + '/';
             img.src = dir + (currentTextureSrc === 'true' ? 'api/texture.png?src=true' : 'api/texture.png');
         }
 
