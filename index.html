@@ -50,10 +50,9 @@
     }
 
     .lang-toggle {
-        position: absolute;
-        top: 0;
-        right: 0;
-        display: inline-flex;
+        display: flex;
+        width: fit-content;
+        margin: 0 auto 12px;
         background: rgba(255, 255, 255, 0.06);
         border: 1px solid var(--panel-border);
         border-radius: 999px;
@@ -67,7 +66,7 @@
         color: var(--text-dim);
         font-size: 0.78em;
         font-weight: 700;
-        padding: 6px 14px;
+        padding: 12px 18px;
         border-radius: 999px;
         cursor: pointer;
         transition: background 0.2s ease, color 0.2s ease;
@@ -578,8 +577,6 @@
 <body>
     <div class="container">
         <header>
-            <div class="lang-toggle" id="langToggle" role="group" aria-label="Language"></div>
-
             <h1>☀️ Ex parte Solis</h1>
             <p data-i18n="tagline">Earth from the Sun's point of view</p>
             <p class="intro" data-i18n-html="introHtml">
@@ -703,6 +700,7 @@
         </div>
 
         <footer>
+            <div class="lang-toggle" id="langToggle" role="group" aria-label="Language"></div>
             <p>
                 &copy; <span id="footerYear"></span>
                 <a href="https://dirdam.github.io" target="_blank" rel="noopener noreferrer">Adri&aacute;n Jim&eacute;nez Pascual</a>
