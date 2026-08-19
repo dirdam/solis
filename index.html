@@ -1396,7 +1396,7 @@
             canvas.addEventListener('pointermove', (e) => {
                 if (!dragging) return;
                 const deltaX = e.clientX - dragStartX;
-                azimuth = dragStartAzimuth + deltaX * 0.4;
+                azimuth = dragStartAzimuth - deltaX * 0.4;
                 scheduleRender();
             });
             canvas.addEventListener('pointerup', () => { dragging = false; });
