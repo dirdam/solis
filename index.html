@@ -733,8 +733,8 @@
         // SUPPORTED_LANGS, LANG_LABELS, MONTH_NAMES_BY_LANG, and every
         // STRINGS object below — no other code changes.
         const I18N_STORAGE_KEY = 'dirdam-lang';
-        const SUPPORTED_LANGS = ['en', 'es'];
-        const LANG_LABELS = { en: 'EN', es: 'ES' };
+        const SUPPORTED_LANGS = ['en', 'es', 'ja'];
+        const LANG_LABELS = { en: 'EN', es: 'ES', ja: '日本語' };
 
         const STRINGS = {
             en: {
@@ -839,6 +839,55 @@
                 septemberEquinox: 'equinoccio de septiembre',
                 decemberSolstice: 'solsticio de diciembre',
             },
+            ja: {
+                tagline: '太陽から見た地球',
+                introHtml: `これまで見てきた地球の地図はすべて、地球自身の視点から描かれています。このプロジェクトでは、
+                    <strong>北が黄道北極を指す、地球の動的な投影図</strong>を作成します。`,
+                textureGroupLabel: '地球のテクスチャ',
+                coordinatedMap: '座標マップ',
+                realMap: '実写マップ',
+                view3dTitle: '3Dビュー',
+                resetView: 'ビューをリセット',
+                orbitAriaLabel: '選択した月における、太陽を周回する地球の軌道上の位置',
+                globeAriaLabel: '地球の地軸の傾きを示す、ドラッグ可能な3D地球儀(夜側は暗く表示)',
+                dragCaption: '地球儀をドラッグして視点を変える',
+                monthOfYear: '月',
+                hourOfDay: '時刻(UTC)',
+                geocentricTitle: '地心図法',
+                heliocentricTitle: '太陽中心図法',
+                earthAriaLabel: '地球自身の視点から見た地球(昼夜を陰影で表示)',
+                rotatedAriaLabel: '太陽から見た地球',
+                viewsShowTitle: '各ビューが示すもの',
+                view3dText: `地球を実際に光が当たった球体として描画します。夜側は暗く陰影がつき、現在太陽の方向を直接向いている
+                    地表の地点には小さなマーカーが表示されます。地球儀をドラッグすると視点を変えられます — 最初は太陽の光が
+                    当たる側を向いており、カメラは常に惑星が公転する平面と水平に保たれるため、地球の地軸の傾きは真上から見た
+                    図ではなく、傾いた様子として見えます。隣にある軌道図は、地球が太陽の周りを回る年間の軌道上のどこに現在
+                    位置しているかを示します。`,
+                geocentricText: `地球を通常の方法で表示し、地球自身の地理的な北極を上にしています — すでに見慣れた地図と
+                    まったく同じです。時刻のスライダーを動かすと、現在太陽の方向を向いている子午線が中心にとどまるように
+                    地図がその場で回転します。陰影のついた夜側と太陽のマーカーは、選択した月と時刻における実際の昼夜の
+                    境界線と太陽の直下点を追跡します。`,
+                heliocentricText1: `これがこのプロジェクトの核となる発想です。同じ地球の地図を、地球ではなく太陽自身の視点から
+                    作られたかのように描き直します。太陽は常にこの地図の正確な中心に位置します — これは偶然ではなく、
+                    この投影法がまさに保証するように設計されているものです。`,
+                heliocentricText2Html: `そこに至るには3つの回転が必要です。まず、地図は時刻に応じて回転し、現在太陽を向いている
+                    子午線が正面に来るようにします。次に、現在の<strong>赤緯</strong> — 太陽が赤道の北または南にどれだけ
+                    離れた真上に位置するか、月によって変化します — の分だけ傾き、その正確な地点が中心に来るようにします。
+                    最後に、地球の実際の23.4°の地軸の傾きが年間を通じて常に見えるようにする量だけ横に<strong>回転(ロール)
+                    </strong>します。赤緯とロールは、この一つの固定された傾きの二つの側面です。赤緯は、地球が太陽に向かって、
+                    あるいは太陽から離れる方向に完全に傾く至点で最大になり、分点でゼロになります — 一方でロールはちょうど
+                    その逆の動きをします。そのため、見えている傾きが消えることはなく、地球が軌道を進むにつれて向きが
+                    回転していくだけなのです。`,
+                seeMoreTools: '他のツールを見る',
+                viewSource: 'ソースを見る',
+                pauseLabel: '一時停止',
+                playLabel: '再生',
+                sunLabel: '太陽',
+                marchEquinox: '春分',
+                juneSolstice: '夏至',
+                septemberEquinox: '秋分',
+                decemberSolstice: '冬至',
+            },
         };
 
         const MONTH_NAMES_BY_LANG = {
@@ -846,6 +895,8 @@
                 'July', 'August', 'September', 'October', 'November', 'December'],
             es: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+            ja: ['1月', '2月', '3月', '4月', '5月', '6月',
+                '7月', '8月', '9月', '10月', '11月', '12月'],
         };
 
         function detectInitialLang() {
