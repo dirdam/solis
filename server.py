@@ -18,6 +18,16 @@ def index():
     return response
 
 
+@app.route("/styles.css")
+def styles():
+    return send_from_directory(".", "styles.css")
+
+
+@app.route("/app.js")
+def app_js():
+    return send_from_directory(".", "app.js")
+
+
 @app.route("/api/texture.png")
 def texture():
     which = "true" if request.args.get("src") == "true" else "projection"
